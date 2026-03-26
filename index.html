@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Lab — Plataforma Interactiva de Ciberseguridad</title>
+<meta name="description" content="Plataforma interactiva para aprender Linux y ciberseguridad con terminal simulada, retos CTF, logros y gamificación.">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Matrix Rain Background -->
+<canvas class="matrix-canvas" id="matrix-canvas"></canvas>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>🐧 Linux Lab</h1>
+      <p>Programación &amp; Ciberseguridad</p>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="prog-bar" style="width:0%"></div></div>
+      <div class="progress-label" id="prog-label">0 / 0 lecciones completadas</div>
+    </div>
+
+    <!-- XP Section -->
+    <div class="xp-section">
+      <div class="xp-header">
+        <div class="xp-level">
+          <span class="level-icon" id="xp-level-icon">🌱</span>
+          <span id="xp-level-text">Novato</span>
+        </div>
+        <span class="xp-amount" id="xp-amount">0 XP</span>
+      </div>
+      <div class="xp-bar-wrap">
+        <div class="xp-bar" id="xp-bar" style="width:0%"></div>
+      </div>
+      <div class="xp-next-level" id="xp-next-level">100 XP para Aprendiz</div>
+    </div>
+
+    <!-- Streak Section -->
+    <div class="streak-section">
+      <span class="streak-flame">🔥</span>
+      <span class="streak-count" id="streak-count">0</span>
+      <span class="streak-label">Racha</span>
+      <span class="streak-days-text" id="streak-days-text">días seguidos</span>
+    </div>
+
+    <!-- Lab Button -->
+    <div class="lab-btn-wrap">
+      <button class="lab-btn" id="lab-btn">
+        <div class="pulse"></div>
+        🧪 Laboratorio CTF
+      </button>
+    </div>
+
+    <!-- Dashboard Button -->
+    <div class="dash-btn-wrap">
+      <button class="dash-btn" id="dash-btn">📊 Mi Perfil / Dashboard</button>
+    </div>
+
+    <div class="mod-list" id="mod-list"></div>
+  </aside>
+
+  <main class="main">
+    <div class="top-bar" id="top-bar" style="display:none">
+      <div class="breadcrumb" id="breadcrumb"></div>
+      <div class="lesson-nav">
+        <button class="nav-btn" id="btn-prev" onclick="navLesson(-1)">← Anterior</button>
+        <button class="nav-btn" id="btn-done" onclick="markDone()">Marcar como visto ✓</button>
+        <button class="nav-btn primary" id="btn-next" onclick="navLesson(1)">Siguiente →</button>
+      </div>
+    </div>
+    <div id="content-area"></div>
+  </main>
+</div>
+
+<!-- Scripts (dependency order) -->
+<script src="js/filesystem.js"></script>
+<script src="js/terminal.js"></script>
+<script src="js/gamification.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/challenges.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

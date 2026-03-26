@@ -1,0 +1,2572 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux – Programación & Ciberseguridad</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --bg2: #161b22;
+      --bg3: #21262d;
+      --border: #30363d;
+      --border2: #484f58;
+      --green: #3fb950;
+      --green2: #26a641;
+      --green3: #0d4429;
+      --teal: #39d353;
+      --cyan: #58a6ff;
+      --yellow: #e3b341;
+      --orange: #f0883e;
+      --red: #f85149;
+      --purple: #d2a8ff;
+      --pink: #ff7b72;
+      --text: #e6edf3;
+      --text2: #8b949e;
+      --text3: #6e7681;
+      --mono: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+    }
+
+    .app {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 280px;
+      min-width: 260px;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--bg);
+    }
+
+    .sidebar-header h1 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .sidebar-header p {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 2px;
+    }
+
+    .progress-bar-wrap {
+      margin-top: 10px;
+      background: var(--bg3);
+      border-radius: 4px;
+      height: 5px;
+    }
+
+    .progress-bar {
+      height: 5px;
+      background: linear-gradient(90deg, var(--green2), var(--green));
+      border-radius: 4px;
+      transition: width .4s;
+    }
+
+    .progress-label {
+      font-size: 10px;
+      color: var(--text3);
+      margin-top: 4px;
+    }
+
+    .mod-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 8px 0;
+    }
+
+    .mod-item {
+      cursor: pointer;
+    }
+
+    .mod-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      letter-spacing: .3px;
+      cursor: pointer;
+      user-select: none;
+      transition: background .15s;
+      border-left: 3px solid transparent;
+    }
+
+    .mod-header:hover {
+      background: var(--bg3);
+      color: var(--text);
+    }
+
+    .mod-header.active {
+      color: var(--green);
+      border-left-color: var(--green);
+      background: rgba(63, 185, 80, .08);
+    }
+
+    .mod-icon {
+      font-size: 14px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .mod-title {
+      flex: 1;
+    }
+
+    .mod-arrow {
+      font-size: 10px;
+      color: var(--text3);
+      transition: transform .2s;
+    }
+
+    .mod-item.open .mod-arrow {
+      transform: rotate(90deg);
+    }
+
+    .mod-badge {
+      background: var(--green3);
+      color: var(--green);
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    .lesson-list {
+      display: none;
+      padding: 2px 0 6px;
+    }
+
+    .mod-item.open .lesson-list {
+      display: block;
+    }
+
+    .lesson-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px 6px 42px;
+      font-size: 12px;
+      color: var(--text2);
+      cursor: pointer;
+      transition: color .15s, background .15s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .lesson-btn:hover {
+      color: var(--text);
+      background: var(--bg3);
+    }
+
+    .lesson-btn.active {
+      color: var(--cyan);
+      font-weight: 600;
+    }
+
+    .lesson-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border2);
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+
+    .lesson-btn.active .lesson-dot {
+      background: var(--cyan);
+    }
+
+    .lesson-btn.done .lesson-dot {
+      background: var(--green);
+    }
+
+    .lesson-btn.done {
+      color: var(--text3);
+      text-decoration: line-through;
+    }
+
+    /* MAIN */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .top-bar {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .breadcrumb {
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    .breadcrumb span {
+      color: var(--text2);
+    }
+
+    .lesson-nav {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--border2);
+      color: var(--text);
+    }
+
+    .nav-btn.primary {
+      background: var(--green3);
+      border-color: var(--green2);
+      color: var(--green);
+    }
+
+    .nav-btn.primary:hover {
+      background: rgba(38, 166, 65, .25);
+    }
+
+    .content {
+      padding: 32px 40px;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .lesson-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .lesson-meta {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      align-items: center;
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .tag-green {
+      background: var(--green3);
+      color: var(--green);
+    }
+
+    .tag-blue {
+      background: rgba(88, 166, 255, .12);
+      color: var(--cyan);
+    }
+
+    .tag-orange {
+      background: rgba(240, 136, 62, .12);
+      color: var(--orange);
+    }
+
+    .tag-purple {
+      background: rgba(210, 168, 255, .1);
+      color: var(--purple);
+    }
+
+    .tag-red {
+      background: rgba(248, 81, 73, .1);
+      color: var(--red);
+    }
+
+    .section {
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .prose {
+      line-height: 1.75;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .prose p {
+      margin-bottom: 12px;
+    }
+
+    .prose strong {
+      color: var(--yellow);
+      font-weight: 600;
+    }
+
+    .prose em {
+      color: var(--purple);
+      font-style: italic;
+    }
+
+    .prose a {
+      color: var(--cyan);
+    }
+
+    .prose ul,
+    .prose ol {
+      padding-left: 22px;
+      margin-bottom: 12px;
+    }
+
+    .prose li {
+      margin-bottom: 5px;
+    }
+
+    .prose code {
+      font-family: var(--mono);
+      background: var(--bg3);
+      color: var(--orange);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+
+    /* TERMINAL */
+    .terminal {
+      background: #010409;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 16px 0;
+      overflow: hidden;
+      font-family: var(--mono);
+    }
+
+    .terminal-header {
+      background: var(--bg2);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+
+    .dot-r {
+      background: #ff5f57;
+    }
+
+    .dot-y {
+      background: #febc2e;
+    }
+
+    .dot-g {
+      background: #28c840;
+    }
+
+    .term-title {
+      font-size: 11px;
+      color: var(--text3);
+      margin-left: auto;
+    }
+
+    .terminal-body {
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.65;
+      overflow-x: auto;
+    }
+
+    .cmd {
+      color: var(--green);
+    }
+
+    .cmd::before {
+      content: '$ ';
+      color: var(--text3);
+    }
+
+    .output {
+      color: var(--text2);
+    }
+
+    .comment {
+      color: var(--text3);
+    }
+
+    .comment::before {
+      content: '# ';
+    }
+
+    .root-cmd {
+      color: var(--yellow);
+    }
+
+    .root-cmd::before {
+      content: '# ';
+      color: var(--red);
+    }
+
+    .t-gap {
+      display: block;
+      height: 6px;
+    }
+
+    .t-hl {
+      color: var(--cyan);
+    }
+
+    /* CALLOUT */
+    .callout {
+      border-left: 3px solid;
+      border-radius: 0 6px 6px 0;
+      padding: 12px 16px;
+      margin: 16px 0;
+    }
+
+    .callout.tip {
+      border-color: var(--green);
+      background: rgba(63, 185, 80, .07);
+    }
+
+    .callout.warn {
+      border-color: var(--yellow);
+      background: rgba(227, 179, 65, .07);
+    }
+
+    .callout.danger {
+      border-color: var(--red);
+      background: rgba(248, 81, 73, .07);
+    }
+
+    .callout.info {
+      border-color: var(--cyan);
+      background: rgba(88, 166, 255, .07);
+    }
+
+    .callout-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 6px;
+    }
+
+    .callout.tip .callout-title {
+      color: var(--green);
+    }
+
+    .callout.warn .callout-title {
+      color: var(--yellow);
+    }
+
+    .callout.danger .callout-title {
+      color: var(--red);
+    }
+
+    .callout.info .callout-title {
+      color: var(--cyan);
+    }
+
+    .callout .prose {
+      font-size: 13.5px;
+    }
+
+    /* COMMAND TABLE */
+    .cmd-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 13px;
+    }
+
+    .cmd-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: var(--bg3);
+      color: var(--text2);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cmd-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .cmd-table td:first-child {
+      font-family: var(--mono);
+      color: var(--orange);
+      white-space: nowrap;
+    }
+
+    .cmd-table td:last-child {
+      color: var(--text2);
+    }
+
+    .cmd-table tr:hover td {
+      background: var(--bg3);
+    }
+
+    /* EXERCISE BOX */
+    .exercise {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin: 20px 0;
+    }
+
+    .ex-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--yellow);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .ex-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .ex-list li {
+      padding: 5px 0;
+      font-size: 13.5px;
+      color: var(--text);
+      display: flex;
+      gap: 8px;
+    }
+
+    .ex-list li::before {
+      content: '→';
+      color: var(--green);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* WELCOME */
+    .welcome {
+      padding: 48px 40px;
+      max-width: 780px;
+    }
+
+    .welcome h1 {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .welcome h1 span {
+      color: var(--green);
+    }
+
+    .welcome p {
+      color: var(--text2);
+      font-size: 16px;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .mod-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .mod-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .15s, transform .15s;
+    }
+
+    .mod-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-1px);
+    }
+
+    .mod-card .icon {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .mod-card h3 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .mod-card p {
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    /* RESOURCES */
+    .resource-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .resource-card {
+      background: var(--bg3);
+      border-radius: 6px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+    }
+
+    .resource-card h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 5px;
+    }
+
+    .resource-card p {
+      font-size: 11.5px;
+      color: var(--text2);
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px;
+    }
+
+    @media (max-width: 700px) {
+      .sidebar {
+        width: 220px;
+        min-width: 200px;
+      }
+
+      .content {
+        padding: 20px 18px;
+      }
+
+      .welcome {
+        padding: 28px 20px;
+      }
+    }
+
+    /* AUTH MODAL & PROFILE */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal h2 {
+      margin-bottom: 20px;
+      color: var(--text);
+      font-weight: 800;
+      font-size: 20px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--text2);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      outline: none;
+      font-family: var(--sans);
+    }
+
+    .input-group input:focus {
+      border-color: var(--cyan);
+    }
+
+    .btn-block {
+      width: 100%;
+      padding: 12px;
+      background: var(--green3);
+      color: var(--green);
+      border: 1px solid var(--green2);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      margin-top: 10px;
+      transition: .15s;
+    }
+
+    .btn-block:hover {
+      background: rgba(38, 166, 65, .25);
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: var(--cyan);
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 16px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .btn-link:hover {
+      text-decoration: underline;
+    }
+
+    .user-profile {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--bg3);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      display: none;
+    }
+
+    .user-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .user-name {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .user-level {
+      font-size: 10px;
+      background: var(--purple);
+      color: #fff;
+      padding: 3px 6px;
+      border-radius: 10px;
+      font-weight: 800;
+    }
+
+    .btn-logout {
+      background: none;
+      border: none;
+      color: var(--red);
+      font-size: 11px;
+      cursor: pointer;
+      margin-top: 10px;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    .login-prompt-btn {
+      width: 100%;
+      padding: 8px;
+      background: var(--bg3);
+      border: 1px dashed var(--border2);
+      color: var(--text);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-top: 12px;
+      transition: .2s;
+      font-weight: 600;
+    }
+
+    .login-prompt-btn:hover {
+      background: var(--border);
+      border-style: solid;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🐧 Linux Completo</h1>
+        <p>Programación &amp; Ciberseguridad</p>
+
+        <!-- AUTH AREA -->
+        <button id="login-prompt" class="login-prompt-btn" onclick="openModal('login')">🔑 Iniciar Sesión para guardar
+          progreso</button>
+        <div id="user-profile" class="user-profile">
+          <div class="user-info">
+            <span class="user-name" id="profile-name">Usuario</span>
+            <span class="user-level" id="profile-level">Lvl 1</span>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" id="xp-bar" style="width:0%"></div>
+          </div>
+          <div class="progress-label" id="xp-label">0 / 50 XP</div>
+
+          <div class="progress-bar-wrap" style="margin-top:12px;">
+            <div class="progress-bar" id="prog-bar"
+              style="width:0%; background: linear-gradient(90deg, var(--cyan), var(--blue));"></div>
+          </div>
+          <div class="progress-label" id="prog-label">0 / 0 lecciones</div>
+          <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+        </div>
+        <!-- END AUTH AREA -->
+      </div>
+      <div class="mod-list" id="mod-list"></div>
+    </aside>
+    <main class="main">
+      <div class="top-bar" id="top-bar" style="display:none">
+        <div class="breadcrumb" id="breadcrumb"></div>
+        <div class="lesson-nav">
+          <button class="nav-btn" id="btn-prev" onclick="navLesson(-1)">← Anterior</button>
+          <button class="nav-btn" id="btn-done" onclick="markDone()">Marcar como visto ✓</button>
+          <button class="nav-btn primary" id="btn-next" onclick="navLesson(1)">Siguiente →</button>
+        </div>
+      </div>
+      <div id="content-area"></div>
+    </main>
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal">
+      <h2 id="modal-title">Iniciar Sesión</h2>
+      <form id="auth-form" onsubmit="handleAuth(event)">
+        <div class="input-group" id="group-username" style="display:none;">
+          <label>Nombre de Hacker</label>
+          <input type="text" id="auth-username" placeholder="p. ej. Neo">
+        </div>
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" id="auth-email" required placeholder="tu@email.com">
+        </div>
+        <div class="input-group">
+          <label>Contraseña</label>
+          <input type="password" id="auth-password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn-block" id="modal-submit">Entrar</button>
+      </form>
+      <button class="btn-link" id="modal-toggle" onclick="toggleAuthMode()">¿No tienes cuenta? Registrate aquí</button>
+    </div>
+  </div>
+
+  <script>
+    // ─── API CONTEXT ───────────────────────────────────────────────────────────────
+    const API_URL = 'http://localhost:3000/api';
+    let authMode = 'login'; // 'login' or 'register'
+    let authToken = localStorage.getItem('linux_token');
+    let currentUser = null;
+
+    // ─── COURSE DATA ───────────────────────────────────────────────────────────────
+    const MODULES = [
+      {
+        id: 1, icon: "🐧", title: "Fundamentos de Linux",
+        lessons: [
+          {
+            id: "1.1", title: "¿Qué es Linux y por qué usarlo?", time: "10 min", level: "Básico",
+            tag: "tag-green",
+            content: `
+<div class="section">
+<div class="section-title">Introducción</div>
+<div class="prose">
+<p><strong>Linux</strong> es un sistema operativo de código abierto basado en el núcleo (<em>kernel</em>) creado por <strong>Linus Torvalds</strong> en 1991. No es solo un sistema operativo: es la base de la internet, los servidores, los dispositivos Android, los supercomputadores y el mundo del hacking ético.</p>
+<p>A diferencia de Windows o macOS, Linux te da <strong>control total</strong> sobre tu sistema. Puedes ver y modificar cada archivo, proceso y configuración.</p>
+</div>
+</div>
+<div class="section">
+<div class="section-title">¿Por qué Linux para programación y ciberseguridad?</div>
+<div class="prose">
+<ul>
+<li><strong>Programación:</strong> La mayoría de servidores web corren Linux. Docker, Kubernetes, Node.js, Python — todo funciona mejor en Linux. Los mejores IDEs y herramientas son nativos de Linux.</li>
+<li><strong>Ciberseguridad:</strong> Kali Linux, Parrot OS, y las principales herramientas de pentesting (Nmap, Metasploit, Wireshark, Burp Suite) son nativas de Linux.</li>
+<li><strong>Gratuito:</strong> Sin licencias. Cualquier distribución es libre.</li>
+<li><strong>Estable y seguro:</strong> Los servidores más críticos del mundo corren Linux por años sin reiniciarse.</li>
+</ul>
+</div>
+</div>
+<div class="section">
+<div class="section-title">El kernel y la arquitectura</div>
+<div class="prose">
+<p>Linux tiene una arquitectura en capas:</p>
+<ul>
+<li><strong>Hardware:</strong> CPU, RAM, disco, red</li>
+<li><strong>Kernel:</strong> Gestiona el hardware, memoria, procesos y sistema de archivos</li>
+<li><strong>Shell:</strong> Intérprete de comandos (Bash, Zsh, Fish)</li>
+<li><strong>Aplicaciones:</strong> Todo lo que usas: navegador, editor, terminal</li>
+</ul>
+</div>
+</div>
+<div class="callout info">
+<div class="callout-title">💡 Dato clave</div>
+<div class="prose">El 96.3% de los servidores web del mundo corren Linux. Si quieres trabajar en tecnología, Linux es esencial.</div>
+</div>
+<div class="exercise">
+<div class="ex-title">🎯 Ejercicio de reflexión</div>
+<ul class="ex-list">
+<li>Investiga qué sistema operativo usa Google, Amazon y Netflix en sus servidores</li>
+<li>Busca 3 diferencias entre el kernel y el sistema operativo</li>
+<li>Anota qué te motiva aprender Linux: ¿programación, ciberseguridad, servidores?</li>
+</ul>
+</div>`
+          },
+          {
+            id: "1.2", title: "Distribuciones Linux: ¿Cuál elegir?", time: "8 min", level: "Básico", tag: "tag-green",
+            content: `
+<div class="section"><div class="section-title">¿Qué es una distribución?</div>
+<div class="prose"><p>Una <strong>distribución</strong> (o "distro") es Linux + herramientas + gestores de paquetes + entorno gráfico empaquetados juntos. El kernel es el mismo; lo que cambia es todo lo demás.</p></div>
+</div>
+<div class="section"><div class="section-title">Distros recomendadas según tu objetivo</div>
+<table class="cmd-table">
+<tr><th>Distro</th><th>Ideal para</th><th>Dificultad</th></tr>
+<tr><td>Ubuntu 24.04 LTS</td><td>Principiantes, programación general</td><td style="color:var(--green)">● Fácil</td></tr>
+<tr><td>Debian 12</td><td>Servidores, estabilidad extrema</td><td style="color:var(--yellow)">●● Medio</td></tr>
+<tr><td>Fedora 40</td><td>Desarrolladores, tecnología punta</td><td style="color:var(--yellow)">●● Medio</td></tr>
+<tr><td>Kali Linux 2024</td><td>Ciberseguridad, pentesting</td><td style="color:var(--orange)">●●● Avanzado</td></tr>
+<tr><td>Parrot OS</td><td>Ciberseguridad, privacidad</td><td style="color:var(--orange)">●●● Avanzado</td></tr>
+<tr><td>Arch Linux</td><td>Aprender en profundidad, personalización</td><td style="color:var(--red)">●●●● Experto</td></tr>
+</table>
+<div class="callout tip"><div class="callout-title">✅ Recomendación para este curso</div>
+<div class="prose">Empieza con <strong>Ubuntu 24.04 LTS</strong>. Es la más documentada, tiene la comunidad más grande y funciona perfectamente para programación y ciberseguridad. Luego migra a Kali cuando llegues al módulo de seguridad.</div>
+</div>
+</div>
+<div class="section"><div class="section-title">Gestores de paquetes</div>
+<div class="prose"><p>Cada familia de distros usa un gestor de paquetes diferente:</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Terminal</div></div>
+<div class="terminal-body">
+<div class="comment">Debian/Ubuntu — apt</div>
+<div class="cmd">sudo apt install firefox</div>
+<span class="t-gap"></span>
+<div class="comment">Fedora/RHEL — dnf</div>
+<div class="cmd">sudo dnf install firefox</div>
+<span class="t-gap"></span>
+<div class="comment">Arch Linux — pacman</div>
+<div class="cmd">sudo pacman -S firefox</div>
+</div></div>
+</div>`
+          },
+          {
+            id: "1.3", title: "Instalación: VirtualBox, WSL y dual boot", time: "15 min", level: "Básico", tag: "tag-green",
+            content: `
+<div class="section"><div class="section-title">3 formas de usar Linux</div>
+<div class="prose">
+<p>Tienes tres opciones principales para empezar con Linux sin perder tu sistema actual:</p>
+</div></div>
+<div class="section"><div class="section-title">Opción 1: WSL2 (Windows Subsystem for Linux)</div>
+<div class="prose"><p>La forma más rápida si usas Windows. Instala un terminal Linux dentro de Windows sin máquina virtual.</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">PowerShell (como Administrador)</div></div>
+<div class="terminal-body">
+<div class="comment">Activar WSL2 y instalar Ubuntu</div>
+<div class="cmd">wsl --install</div>
+<span class="t-gap"></span>
+<div class="comment">Ver distros disponibles</div>
+<div class="cmd">wsl --list --online</div>
+<span class="t-gap"></span>
+<div class="comment">Instalar una distro específica</div>
+<div class="cmd">wsl --install -d Ubuntu-24.04</div>
+<span class="t-gap"></span>
+<div class="comment">Verificar instalación</div>
+<div class="cmd">wsl --status</div>
+</div></div>
+<div class="callout tip"><div class="callout-title">✅ WSL2 es perfecto para</div>
+<div class="prose">Programación, scripting y aprendizaje. <strong>Limitación:</strong> algunas herramientas de red de ciberseguridad no funcionan bien en WSL2. Para hacking ético, usa VirtualBox o dual boot.</div></div>
+</div>
+<div class="section"><div class="section-title">Opción 2: VirtualBox (Máquina Virtual)</div>
+<div class="prose">
+<ol>
+<li>Descarga VirtualBox desde <code>virtualbox.org</code></li>
+<li>Descarga la ISO de Ubuntu desde <code>ubuntu.com</code></li>
+<li>Crea una nueva VM: <strong>4GB RAM mínimo, 25GB disco, 2 CPUs</strong></li>
+<li>Instala Ubuntu desde la ISO</li>
+<li>Instala las Guest Additions para mejor rendimiento</li>
+</ol>
+<p><strong>Ventaja:</strong> Aislamiento total. Puedes romperla y restaurarla con snapshots. Ideal para ciberseguridad.</p>
+</div></div>
+<div class="section"><div class="section-title">Opción 3: Dual Boot</div>
+<div class="callout warn"><div class="callout-title">⚠️ Precaución</div>
+<div class="prose">El dual boot modifica particiones de disco. Haz backup antes. Si no tienes experiencia, comienza con VirtualBox.</div></div>
+<div class="prose"><p>Instala Linux junto a Windows en particiones separadas. Al encender el PC, eliges qué sistema iniciar. Ofrece <strong>rendimiento nativo</strong> — ideal para uso diario y hacking ético que requiere acceso directo al hardware de red.</p></div>
+</div>`
+          }
+        ]
+      },
+      {
+        id: 2, icon: "💻", title: "La Terminal – Tu Arma Principal",
+        lessons: [
+          {
+            id: "2.1", title: "Anatomía del prompt y primeros comandos", time: "15 min", level: "Básico", tag: "tag-green",
+            content: `
+<div class="section"><div class="section-title">El prompt de la terminal</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Bash</div></div>
+<div class="terminal-body">
+<div class="comment">Anatomía del prompt</div>
+<span style="color:var(--green)">usuario</span><span style="color:var(--text2)">@</span><span style="color:var(--cyan)">hostname</span><span style="color:var(--text2)">:</span><span style="color:var(--purple)">~/directorio</span><span style="color:var(--yellow)">$</span><span style="color:var(--text)"> comando</span>
+<span class="t-gap"></span>
+<div class="comment">$ = usuario normal   # = usuario root (¡cuidado!)</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Comandos esenciales de navegación</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Terminal</div></div>
+<div class="terminal-body">
+<div class="comment">¿Dónde estoy?</div>
+<div class="cmd">pwd</div>
+<div class="output">/home/usuario</div>
+<span class="t-gap"></span>
+<div class="comment">Listar archivos</div>
+<div class="cmd">ls</div>
+<div class="output">Descargas  Documentos  Escritorio  Imágenes</div>
+<span class="t-gap"></span>
+<div class="comment">Listar con detalles y archivos ocultos</div>
+<div class="cmd">ls -la</div>
+<div class="output">total 48<br>drwxr-xr-x  8 user user 4096 ene 15 10:30 .<br>drwxr-xr-x 24 root root 4096 ene 14 08:20 ..<br>-rw-------  1 user user  220 ene 14 08:20 .bash_history<br>drwxr-xr-x  2 user user 4096 ene 15 09:15 Documentos</div>
+<span class="t-gap"></span>
+<div class="comment">Cambiar de directorio</div>
+<div class="cmd">cd Documentos</div>
+<div class="cmd">cd ~</div><div class="output">  # Ir al home</div>
+<div class="cmd">cd ..</div><div class="output">  # Subir un nivel</div>
+<div class="cmd">cd -</div><div class="output">  # Volver al directorio anterior</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Comandos para obtener ayuda</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Terminal</div></div>
+<div class="terminal-body">
+<div class="comment">Manual completo de un comando</div>
+<div class="cmd">man ls</div>
+<span class="t-gap"></span>
+<div class="comment">Ayuda rápida</div>
+<div class="cmd">ls --help</div>
+<span class="t-gap"></span>
+<div class="comment">Búsqueda de comandos por función</div>
+<div class="cmd">apropos "list files"</div>
+<span class="t-gap"></span>
+<div class="comment">¿Qué es un comando?</div>
+<div class="cmd">type ls</div>
+<div class="output">ls is aliased to 'ls --color=auto'</div>
+<div class="cmd">which python3</div>
+<div class="output">/usr/bin/python3</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Atajos de teclado esenciales</div>
+<table class="cmd-table">
+<tr><th>Atajo</th><th>Función</th></tr>
+<tr><td>Ctrl + C</td><td>Interrumpir proceso en ejecución</td></tr>
+<tr><td>Ctrl + D</td><td>Cerrar terminal / fin de entrada</td></tr>
+<tr><td>Ctrl + L</td><td>Limpiar pantalla (igual que clear)</td></tr>
+<tr><td>Ctrl + A</td><td>Ir al inicio de la línea</td></tr>
+<tr><td>Ctrl + E</td><td>Ir al final de la línea</td></tr>
+<tr><td>Ctrl + R</td><td>Buscar en historial de comandos</td></tr>
+<tr><td>Tab</td><td>Autocompletar comando o archivo</td></tr>
+<tr><td>Tab Tab</td><td>Ver todas las opciones disponibles</td></tr>
+<tr><td>↑ / ↓</td><td>Navegar historial de comandos</td></tr>
+<tr><td>!!</td><td>Repetir último comando</td></tr>
+<tr><td>!ssh</td><td>Repetir último comando que empieza con ssh</td></tr>
+</table>
+</div>
+<div class="exercise"><div class="ex-title">🎯 Práctica</div>
+<ul class="ex-list">
+<li>Abre una terminal y ejecuta <code>pwd</code>, luego <code>ls -la</code></li>
+<li>Navega a <code>/etc</code> con <code>cd /etc</code> y lista los archivos</li>
+<li>Usa <code>man ls</code> para descubrir la opción que ordena por fecha de modificación</li>
+<li>Prueba <code>Ctrl+R</code> y escribe "ls" para buscar en tu historial</li>
+</ul></div>`
+          },
+          {
+            id: "2.2", title: "Gestión de archivos y directorios", time: "20 min", level: "Básico", tag: "tag-green",
+            content: `
+<div class="section"><div class="section-title">Crear, copiar, mover y eliminar</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Terminal</div></div>
+<div class="terminal-body">
+<div class="comment">Crear directorios</div>
+<div class="cmd">mkdir proyecto</div>
+<div class="cmd">mkdir -p proyectos/web/css</div><div class="output">  # Crea toda la ruta</div>
+<span class="t-gap"></span>
+<div class="comment">Crear archivos</div>
+<div class="cmd">touch archivo.txt</div>
+<div class="cmd">touch archivo1.txt archivo2.txt archivo3.txt</div>
+<span class="t-gap"></span>
+<div class="comment">Copiar archivos y directorios</div>
+<div class="cmd">cp archivo.txt copia.txt</div>
+<div class="cmd">cp -r directorio/ destino/</div><div class="output">  # -r para directorios</div>
+<span class="t-gap"></span>
+<div class="comment">Mover / renombrar</div>
+<div class="cmd">mv archivo.txt documentos/</div>
+<div class="cmd">mv nombre_viejo.txt nombre_nuevo.txt</div>
+<span class="t-gap"></span>
+<div class="comment">Eliminar (¡SIN papelera!)</div>
+<div class="cmd">rm archivo.txt</div>
+<div class="cmd">rm -r directorio/</div><div class="output">  # Elimina directorio recursivamente</div>
+<div class="cmd">rm -rf directorio/</div><div class="output">  # Forzar sin preguntar</div>
+</div></div>
+<div class="callout danger"><div class="callout-title">☠️ Peligro — rm -rf</div>
+<div class="prose"><code>rm -rf /</code> o <code>rm -rf ~</code> elimina TODO sin recuperación. <strong>Nunca ejecutes un rm sin entenderlo completamente.</strong> No hay papelera de reciclaje en la terminal.</div></div>
+</div>
+<div class="section"><div class="section-title">Ver contenido de archivos</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Terminal</div></div>
+<div class="terminal-body">
+<div class="comment">Ver archivo completo</div>
+<div class="cmd">cat /etc/os-release</div>
+<span class="t-gap"></span>
+<div class="comment">Ver con paginación (q para salir)</div>
+<div class="cmd">less /var/log/syslog</div>
+<span class="t-gap"></span>
+<div class="comment">Primeras y últimas líneas</div>
+<div class="cmd">head -20 archivo.log</div>
+<div class="cmd">tail -50 archivo.log</div>
+<div class="cmd">tail -f /var/log/syslog</div><div class="output">  # -f sigue en tiempo real</div>
+<span class="t-gap"></span>
+<div class="comment">Contar líneas, palabras, caracteres</div>
+<div class="cmd">wc -l archivo.txt</div>
+<div class="output">342 archivo.txt</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Redirección y pipes — la magia de Linux</div>
+<div class="prose"><p>El <strong>pipe <code>|</code></strong> conecta la salida de un comando con la entrada del siguiente. Es una de las características más poderosas de Linux.</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Terminal</div></div>
+<div class="terminal-body">
+<div class="comment">Pipe: pasar salida a otro comando</div>
+<div class="cmd">ls -la | grep ".txt"</div>
+<div class="cmd">cat /etc/passwd | wc -l</div>
+<div class="cmd">ps aux | grep firefox | head -5</div>
+<span class="t-gap"></span>
+<div class="comment">Redirigir salida a archivo</div>
+<div class="cmd">ls > lista.txt</div><div class="output">       # Crea o sobreescribe</div>
+<div class="cmd">echo "Hola" >> notas.txt</div><div class="output">  # Añade al final</div>
+<span class="t-gap"></span>
+<div class="comment">Redirigir errores</div>
+<div class="cmd">comando 2> errores.log</div>
+<div class="cmd">comando &> todo.log</div><div class="output">     # Salida y errores</div>
+</div></div>
+</div>
+<div class="exercise"><div class="ex-title">🎯 Práctica</div>
+<ul class="ex-list">
+<li>Crea la estructura: <code>mkdir -p ~/practica/linux/{scripts,docs,config}</code></li>
+<li>Crea 5 archivos .txt en <code>~/practica/linux/docs/</code></li>
+<li>Lista todos los archivos de <code>/etc</code> que terminan en ".conf" con: <code>ls /etc | grep ".conf"</code></li>
+<li>Cuenta cuántas líneas tiene <code>/etc/passwd</code></li>
+<li>Guarda la salida de <code>ls -la ~</code> en un archivo llamado <code>mi_home.txt</code></li>
+</ul></div>`
+          },
+          {
+            id: "2.3", title: "Búsqueda avanzada: find y grep", time: "15 min", level: "Intermedio", tag: "tag-blue",
+            content: `
+<div class="section"><div class="section-title">find — buscar archivos</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Terminal</div></div>
+<div class="terminal-body">
+<div class="comment">Buscar por nombre</div>
+<div class="cmd">find /home -name "*.txt"</div>
+<div class="cmd">find / -name "passwd" 2>/dev/null</div>
+<span class="t-gap"></span>
+<div class="comment">Buscar por tipo (f=file, d=directory, l=link)</div>
+<div class="cmd">find /var/log -type f -name "*.log"</div>
+<span class="t-gap"></span>
+<div class="comment">Buscar por tamaño</div>
+<div class="cmd">find /home -size +100M</div><div class="output">  # Archivos mayores a 100MB</div>
+<div class="cmd">find /tmp -size -1k</div><div class="output">   # Menores a 1KB</div>
+<span class="t-gap"></span>
+<div class="comment">Buscar por permisos (¡útil en pentesting!)</div>
+<div class="cmd">find / -perm -4000 2>/dev/null</div><div class="output">  # SUID</div>
+<div class="cmd">find / -perm -2000 2>/dev/null</div><div class="output">  # SGID</div>
+<span class="t-gap"></span>
+<div class="comment">Buscar y ejecutar acción</div>
+<div class="cmd">find /tmp -name "*.tmp" -delete</div>
+<div class="cmd">find /logs -name "*.log" -exec gzip {} \;</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">grep — buscar dentro de archivos</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Terminal</div></div>
+<div class="terminal-body">
+<div class="comment">Buscar texto en archivo</div>
+<div class="cmd">grep "root" /etc/passwd</div>
+<div class="output">root:x:0:0:root:/root:/bin/bash</div>
+<span class="t-gap"></span>
+<div class="comment">Opciones útiles</div>
+<div class="cmd">grep -i "error" /var/log/syslog</div><div class="output">    # -i ignora mayúsculas</div>
+<div class="cmd">grep -n "warning" archivo.log</div><div class="output">    # -n muestra número de línea</div>
+<div class="cmd">grep -r "password" /etc/</div><div class="output">         # -r busca recursivamente</div>
+<div class="cmd">grep -v "comentario" archivo.conf</div><div class="output">  # -v excluye coincidencias</div>
+<div class="cmd">grep -c "ERROR" app.log</div><div class="output">          # -c cuenta ocurrencias</div>
+<span class="t-gap"></span>
+<div class="comment">Expresiones regulares</div>
+<div class="cmd">grep -E "^root|^daemon" /etc/passwd</div>
+<div class="cmd">grep -E "[0-9]{1,3}\.[0-9]{1,3}" access.log</div><div class="output">  # IPs</div>
+<span class="t-gap"></span>
+<div class="comment">Combinaciones poderosas</div>
+<div class="cmd">ps aux | grep -v grep | grep nginx</div>
+<div class="cmd">cat /etc/passwd | grep -v "nologin" | grep -v "false"</div>
+</div></div>
+</div>
+<div class="callout tip"><div class="callout-title">🔍 Ciberseguridad — grep para recon</div>
+<div class="prose"><code>grep -r "password\|secret\|api_key\|token" /var/www/ 2>/dev/null</code><br>Busca credenciales hardcodeadas en código fuente. Una técnica básica de auditoría.</div></div>`
+          }
+        ]
+      },
+      {
+        id: 3, icon: "📁", title: "Sistema de Archivos Linux",
+        lessons: [
+          {
+            id: "3.1", title: "Jerarquía FHS: La estructura de Linux", time: "12 min", level: "Básico", tag: "tag-green",
+            content: `
+<div class="section"><div class="section-title">Filesystem Hierarchy Standard (FHS)</div>
+<div class="prose"><p>En Linux, <strong>todo es un archivo</strong> — dispositivos, procesos, red. La estructura de directorios es estándar y crucial entenderla.</p></div>
+<table class="cmd-table">
+<tr><th>Directorio</th><th>Contenido</th><th>Importancia</th></tr>
+<tr><td>/</td><td>Raíz del sistema</td><td>Todo empieza aquí</td></tr>
+<tr><td>/home</td><td>Directorio de usuarios</td><td>Tus archivos personales</td></tr>
+<tr><td>/root</td><td>Home del superusuario</td><td>Solo root puede acceder</td></tr>
+<tr><td>/etc</td><td>Configuración del sistema</td><td>¡Muy importante en pentesting!</td></tr>
+<tr><td>/var</td><td>Datos variables (logs, bases de datos)</td><td>/var/log tiene los registros</td></tr>
+<tr><td>/tmp</td><td>Archivos temporales</td><td>Se borra al reiniciar</td></tr>
+<tr><td>/bin, /usr/bin</td><td>Ejecutables del sistema</td><td>ls, grep, cat están aquí</td></tr>
+<tr><td>/sbin, /usr/sbin</td><td>Ejecutables de administración</td><td>ifconfig, iptables, fdisk</td></tr>
+<tr><td>/lib, /usr/lib</td><td>Bibliotecas compartidas</td><td>Como .dll en Windows</td></tr>
+<tr><td>/proc</td><td>Info de procesos en tiempo real</td><td>Sistema de archivos virtual</td></tr>
+<tr><td>/sys</td><td>Info del hardware/kernel</td><td>Sistema de archivos virtual</td></tr>
+<tr><td>/dev</td><td>Dispositivos (disco, USB, red)</td><td>/dev/sda = primer disco</td></tr>
+<tr><td>/opt</td><td>Software de terceros</td><td>Kali tools, etc.</td></tr>
+<tr><td>/mnt, /media</td><td>Puntos de montaje</td><td>USB, particiones</td></tr>
+</table>
+</div>
+<div class="section"><div class="section-title">Archivos críticos para conocer</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Terminal</div></div>
+<div class="terminal-body">
+<div class="comment">Usuarios del sistema</div>
+<div class="cmd">cat /etc/passwd</div>
+<div class="output">root:x:0:0:root:/root:/bin/bash<br>usuario:x:1000:1000::/home/usuario:/bin/bash</div>
+<span class="t-gap"></span>
+<div class="comment">Contraseñas hasheadas (solo root)</div>
+<div class="cmd">sudo cat /etc/shadow</div>
+<span class="t-gap"></span>
+<div class="comment">Grupos del sistema</div>
+<div class="cmd">cat /etc/group</div>
+<span class="t-gap"></span>
+<div class="comment">Configuración de red</div>
+<div class="cmd">cat /etc/hosts</div>
+<div class="cmd">cat /etc/resolv.conf</div>
+<span class="t-gap"></span>
+<div class="comment">Ver logs del sistema</div>
+<div class="cmd">tail -f /var/log/syslog</div>
+<div class="cmd">tail -f /var/log/auth.log</div><div class="output">  # Intentos de login</div>
+</div></div>
+</div>
+<div class="callout info"><div class="callout-title">🔐 Pentesting — archivos clave</div>
+<div class="prose">En un pentest, estos son los primeros archivos a revisar: <code>/etc/passwd</code>, <code>/etc/shadow</code>, <code>/etc/crontab</code>, <code>/etc/sudoers</code>, <code>~/.ssh/</code>, <code>/var/log/auth.log</code>.</div></div>`
+          },
+          {
+            id: "3.2", title: "Editores de texto: nano y vim", time: "20 min", level: "Básico", tag: "tag-green",
+            content: `
+<div class="section"><div class="section-title">nano — editor para principiantes</div>
+<div class="prose"><p><strong>nano</strong> es el editor más amigable. Lo que ves en pantalla es lo que editas. Los atajos se muestran en la parte inferior.</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Terminal</div></div>
+<div class="terminal-body">
+<div class="comment">Abrir o crear archivo</div>
+<div class="cmd">nano mi_script.sh</div>
+<span class="t-gap"></span>
+<div class="comment">Atajos dentro de nano (^ = Ctrl)</div>
+<div class="output">^O = Guardar   ^X = Salir   ^K = Cortar línea<br>^U = Pegar     ^W = Buscar  ^\ = Reemplazar<br>^G = Ayuda     ^A = Inicio  ^E = Final de línea</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">vim — el editor del hacker</div>
+<div class="prose"><p><strong>vim</strong> tiene una curva de aprendizaje pronunciada pero es extremadamente potente y está disponible en cualquier sistema Linux/Unix. Los sysadmins y pentesters lo usan constantemente en servidores sin interfaz gráfica.</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">vim — Modos</div></div>
+<div class="terminal-body">
+<div class="comment">Abrir archivo</div>
+<div class="cmd">vim archivo.py</div>
+<span class="t-gap"></span>
+<div class="comment">MODO NORMAL (default) — navegar y ejecutar comandos</div>
+<div class="output">h j k l = ← ↓ ↑ →   (o flechas normales)<br>gg = ir al inicio     G = ir al final<br>0 = inicio de línea   $ = fin de línea<br>dd = eliminar línea   yy = copiar línea<br>p = pegar            u = deshacer (undo)<br>Ctrl+R = rehacer     /texto = buscar</div>
+<span class="t-gap"></span>
+<div class="comment">MODO INSERT — escribir texto</div>
+<div class="output">i = insertar aquí     a = insertar después<br>o = nueva línea abajo  O = nueva línea arriba<br>ESC = volver al modo normal</div>
+<span class="t-gap"></span>
+<div class="comment">MODO COMANDO — guardar, salir, etc.</div>
+<div class="output">:w = guardar         :q = salir<br>:wq = guardar y salir  :q! = salir sin guardar<br>:set number = mostrar números de línea<br>:%s/old/new/g = reemplazar todo</div>
+</div></div>
+<div class="callout tip"><div class="callout-title">💡 Cómo salir de vim (la pregunta clásica)</div>
+<div class="prose">Presiona <code>ESC</code> para asegurarte de estar en modo normal, luego escribe <code>:wq</code> y Enter para guardar y salir, o <code>:q!</code> para salir sin guardar.</div></div>
+</div>
+<div class="exercise"><div class="ex-title">🎯 Práctica vim</div>
+<ul class="ex-list">
+<li>Ejecuta <code>vimtutor</code> en la terminal — el tutorial oficial de vim (30 min, muy útil)</li>
+<li>Abre un archivo con vim, entra al modo INSERT con <code>i</code>, escribe algo, y guarda con <code>ESC :wq</code></li>
+<li>Practica los movimientos: <code>gg</code>, <code>G</code>, <code>dd</code>, <code>yy</code>, <code>p</code></li>
+</ul></div>`
+          }
+        ]
+      },
+      {
+        id: 4, icon: "🔐", title: "Usuarios, Grupos y Permisos",
+        lessons: [
+          {
+            id: "4.1", title: "Gestión de usuarios y grupos", time: "18 min", level: "Intermedio", tag: "tag-blue",
+            content: `
+<div class="section"><div class="section-title">El sistema de usuarios de Linux</div>
+<div class="prose"><p>Cada usuario tiene un <strong>UID</strong> (User ID). Root siempre es UID 0. Los usuarios del sistema tienen UID 1-999 y los usuarios normales desde 1000.</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Gestión de Usuarios</div></div>
+<div class="terminal-body">
+<div class="comment">Ver usuario actual</div>
+<div class="cmd">whoami</div>
+<div class="output">usuario</div>
+<div class="cmd">id</div>
+<div class="output">uid=1000(usuario) gid=1000(usuario) groups=1000(usuario),4(adm),27(sudo)</div>
+<span class="t-gap"></span>
+<div class="comment">Crear usuario</div>
+<div class="root-cmd">useradd -m -s /bin/bash juan</div>
+<div class="root-cmd">passwd juan</div>
+<span class="t-gap"></span>
+<div class="comment">Modificar usuario</div>
+<div class="root-cmd">usermod -aG sudo juan</div><div class="output">  # Añadir al grupo sudo</div>
+<div class="root-cmd">usermod -s /bin/zsh juan</div><div class="output">  # Cambiar shell</div>
+<span class="t-gap"></span>
+<div class="comment">Eliminar usuario</div>
+<div class="root-cmd">userdel -r juan</div><div class="output">  # -r elimina también su home</div>
+<span class="t-gap"></span>
+<div class="comment">Ver usuarios del sistema</div>
+<div class="cmd">cat /etc/passwd | cut -d: -f1</div>
+<div class="cmd">getent passwd</div>
+<span class="t-gap"></span>
+<div class="comment">Gestión de grupos</div>
+<div class="root-cmd">groupadd developers</div>
+<div class="root-cmd">usermod -aG developers juan</div>
+<div class="cmd">groups juan</div>
+<div class="output">juan : juan sudo developers</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">sudo — ejecutar como root</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Terminal</div></div>
+<div class="terminal-body">
+<div class="comment">Ejecutar un comando como root</div>
+<div class="cmd">sudo apt update</div>
+<div class="cmd">sudo -l</div><div class="output">  # Ver qué puedes hacer con sudo</div>
+<span class="t-gap"></span>
+<div class="comment">Abrir shell como root (¡usar con cuidado!)</div>
+<div class="cmd">sudo -i</div>
+<div class="cmd">sudo su</div>
+<span class="t-gap"></span>
+<div class="comment">Ejecutar como otro usuario</div>
+<div class="cmd">sudo -u juan ls /home/juan</div>
+</div></div>
+</div>`
+          },
+          {
+            id: "4.2", title: "Permisos: chmod, chown y el sistema rwx", time: "20 min", level: "Intermedio", tag: "tag-blue",
+            content: `
+<div class="section"><div class="section-title">El sistema de permisos rwx</div>
+<div class="prose"><p>Cada archivo tiene permisos para tres entidades: <strong>propietario (u)</strong>, <strong>grupo (g)</strong> y <strong>otros (o)</strong>.</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Leyendo permisos</div></div>
+<div class="terminal-body">
+<div class="cmd">ls -la archivo.sh</div>
+<div class="output"><span style="color:var(--green)">-rwxr-xr--</span> 1 juan developers 1024 ene 15 10:30 archivo.sh</div>
+<span class="t-gap"></span>
+<div class="output"><span style="color:var(--text3)">│   │  │  │</span>
+<span style="color:var(--text3)">│   │  │  └─── otros (r-- = solo lectura)</span>
+<span style="color:var(--text3)">│   │  └────── grupo (r-x = lectura y ejecución)</span>
+<span style="color:var(--text3)">│   └───────── propietario (rwx = todo)</span>
+<span style="color:var(--text3)">└───────────── tipo (- archivo, d directorio, l enlace)</span></div>
+<span class="t-gap"></span>
+<div class="comment">r=4, w=2, x=1  →  rwx=7, rw-=6, r-x=5, r--=4</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">chmod — cambiar permisos</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">chmod</div></div>
+<div class="terminal-body">
+<div class="comment">Modo octal (más común)</div>
+<div class="cmd">chmod 755 script.sh</div><div class="output">   # rwxr-xr-x</div>
+<div class="cmd">chmod 644 archivo.txt</div><div class="output">  # rw-r--r--</div>
+<div class="cmd">chmod 600 clave.pem</div><div class="output">   # rw------- (solo propietario)</div>
+<div class="cmd">chmod 777 publico/</div><div class="output">    # rwxrwxrwx (¡peligroso!)</div>
+<span class="t-gap"></span>
+<div class="comment">Modo simbólico</div>
+<div class="cmd">chmod +x script.sh</div><div class="output">       # Añadir ejecución a todos</div>
+<div class="cmd">chmod u+x,g-w script.sh</div><div class="output">   # Propietario +x, grupo -w</div>
+<div class="cmd">chmod o-r secreto.txt</div><div class="output">     # Quitar lectura a otros</div>
+<div class="cmd">chmod -R 755 directorio/</div><div class="output">   # Recursivo</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">chown — cambiar propietario</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">chown</div></div>
+<div class="terminal-body">
+<div class="root-cmd">chown juan archivo.txt</div>
+<div class="root-cmd">chown juan:developers proyecto/</div>
+<div class="root-cmd">chown -R www-data:www-data /var/www/html/</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">SUID, SGID y Sticky bit — permisos especiales</div>
+<div class="prose"><p>Estos son <strong>críticos en ciberseguridad</strong>: los binarios SUID corren con los privilegios del propietario (generalmente root), lo que puede ser una vulnerabilidad.</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Permisos Especiales</div></div>
+<div class="terminal-body">
+<div class="comment">SUID (corre como el dueño del archivo)</div>
+<div class="cmd">ls -la /usr/bin/passwd</div>
+<div class="output">-rwsr-xr-x 1 root root 59976 /usr/bin/passwd</div><div class="output">     # 's' indica SUID</div>
+<span class="t-gap"></span>
+<div class="comment">Buscar todos los SUID (pentesting)</div>
+<div class="cmd">find / -perm -4000 -type f 2>/dev/null</div>
+<span class="t-gap"></span>
+<div class="comment">Sticky bit (solo el dueño puede borrar)</div>
+<div class="cmd">ls -la /tmp</div>
+<div class="output">drwxrwxrwt  1 root root /tmp</div><div class="output">     # 't' = sticky bit</div>
+</div></div>
+</div>
+<div class="callout warn"><div class="callout-title">⚠️ Escalada de privilegios</div>
+<div class="prose">Los binarios con SUID incorrecto son una de las formas más comunes de escalada de privilegios en CTFs y pentests reales. Siempre busca SUIDs en tus ejercicios de hacking ético.</div></div>`
+          }
+        ]
+      },
+      {
+        id: 5, icon: "⚙️", title: "Procesos y Servicios",
+        lessons: [
+          {
+            id: "5.1", title: "Gestión de procesos", time: "18 min", level: "Intermedio", tag: "tag-blue",
+            content: `
+<div class="section"><div class="section-title">Ver y gestionar procesos</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Procesos</div></div>
+<div class="terminal-body">
+<div class="comment">Ver todos los procesos</div>
+<div class="cmd">ps aux</div>
+<div class="output">USER    PID  %CPU %MEM  VSZ    RSS   STAT START   TIME COMMAND<br>root      1   0.0  0.3 171820 12288 Ss   10:00   0:01 /sbin/init<br>juan   1234   1.2  2.1 456789 87654 Sl   10:05   0:30 /usr/bin/firefox</div>
+<span class="t-gap"></span>
+<div class="comment">Monitor en tiempo real</div>
+<div class="cmd">top</div><div class="output">      # q para salir, k para kill, M ordenar por memoria</div>
+<div class="cmd">htop</div><div class="output">     # Versión mejorada (instalar: sudo apt install htop)</div>
+<span class="t-gap"></span>
+<div class="comment">Buscar proceso específico</div>
+<div class="cmd">ps aux | grep nginx</div>
+<div class="cmd">pgrep nginx</div>
+<div class="output">1234</div>
+<span class="t-gap"></span>
+<div class="comment">Árbol de procesos</div>
+<div class="cmd">pstree -p</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Señales y kill</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Kill & Señales</div></div>
+<div class="terminal-body">
+<div class="comment">Matar proceso por PID</div>
+<div class="cmd">kill 1234</div><div class="output">         # SIGTERM (graceful)</div>
+<div class="cmd">kill -9 1234</div><div class="output">      # SIGKILL (forzado)</div>
+<div class="cmd">kill -SIGSTOP 1234</div><div class="output">  # Pausar proceso</div>
+<div class="cmd">kill -SIGCONT 1234</div><div class="output">  # Continuar proceso</div>
+<span class="t-gap"></span>
+<div class="comment">Matar por nombre</div>
+<div class="cmd">pkill firefox</div>
+<div class="cmd">killall nginx</div>
+<span class="t-gap"></span>
+<div class="comment">Jobs — procesos en background</div>
+<div class="cmd">sleep 100 &</div><div class="output">         # Ejecutar en background</div>
+<div class="cmd">jobs</div>
+<div class="output">[1]+ Running    sleep 100 &</div>
+<div class="cmd">fg %1</div><div class="output">           # Traer al foreground</div>
+<div class="cmd">bg %1</div><div class="output">           # Enviar al background</div>
+<span class="t-gap"></span>
+<div class="comment">Mantener proceso al cerrar terminal</div>
+<div class="cmd">nohup python3 servidor.py &</div>
+<div class="cmd">disown %1</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">systemd — gestión de servicios</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">systemctl</div></div>
+<div class="terminal-body">
+<div class="comment">Estado de un servicio</div>
+<div class="cmd">systemctl status ssh</div>
+<div class="cmd">systemctl status nginx</div>
+<span class="t-gap"></span>
+<div class="comment">Iniciar, detener, reiniciar</div>
+<div class="root-cmd">systemctl start apache2</div>
+<div class="root-cmd">systemctl stop apache2</div>
+<div class="root-cmd">systemctl restart apache2</div>
+<div class="root-cmd">systemctl reload apache2</div>
+<span class="t-gap"></span>
+<div class="comment">Habilitar/deshabilitar al inicio</div>
+<div class="root-cmd">systemctl enable ssh</div>
+<div class="root-cmd">systemctl disable ssh</div>
+<span class="t-gap"></span>
+<div class="comment">Ver logs del servicio</div>
+<div class="cmd">journalctl -u nginx</div>
+<div class="cmd">journalctl -u nginx -f</div><div class="output">  # Tiempo real</div>
+<div class="cmd">journalctl -xe</div><div class="output">        # Últimos errores</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">cron — programar tareas</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">crontab</div></div>
+<div class="terminal-body">
+<div class="comment">Editar crontab del usuario</div>
+<div class="cmd">crontab -e</div>
+<span class="t-gap"></span>
+<div class="comment">Formato: minuto hora día mes día_semana comando</div>
+<div class="output"># Cada día a las 2:30 AM</div>
+<div class="output">30 2 * * * /home/juan/backup.sh</div>
+<span class="t-gap"></span>
+<div class="output"># Cada hora</div>
+<div class="output">0 * * * * /usr/bin/python3 /home/juan/monitor.py</div>
+<span class="t-gap"></span>
+<div class="output"># Cada 5 minutos</div>
+<div class="output">*/5 * * * * curl -s https://api.ejemplo.com/ping</div>
+<span class="t-gap"></span>
+<div class="output"># Al reiniciar</div>
+<div class="output">@reboot /home/juan/inicio.sh</div>
+<span class="t-gap"></span>
+<div class="comment">Ver crontabs del sistema (pentesting)</div>
+<div class="cmd">cat /etc/crontab</div>
+<div class="cmd">ls /etc/cron.d/</div>
+</div></div>
+</div>`
+          }
+        ]
+      },
+      {
+        id: 6, icon: "🌐", title: "Redes en Linux",
+        lessons: [
+          {
+            id: "6.1", title: "Comandos de red esenciales", time: "20 min", level: "Intermedio", tag: "tag-blue",
+            content: `
+<div class="section"><div class="section-title">Ver configuración de red</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Comandos de Red</div></div>
+<div class="terminal-body">
+<div class="comment">Ver interfaces de red</div>
+<div class="cmd">ip addr show</div><div class="output">  # Moderno</div>
+<div class="cmd">ifconfig</div><div class="output">      # Clásico (sudo apt install net-tools)</div>
+<span class="t-gap"></span>
+<div class="comment">Ver tabla de rutas</div>
+<div class="cmd">ip route show</div>
+<div class="cmd">netstat -rn</div>
+<span class="t-gap"></span>
+<div class="comment">Conexiones activas</div>
+<div class="cmd">ss -tuln</div><div class="output">    # Puertos escuchando</div>
+<div class="cmd">ss -tunp</div><div class="output">    # Con nombre de proceso</div>
+<div class="cmd">netstat -tuln</div><div class="output">  # Alternativa clásica</div>
+<span class="t-gap"></span>
+<div class="comment">Test de conectividad</div>
+<div class="cmd">ping -c 4 8.8.8.8</div>
+<div class="cmd">traceroute google.com</div>
+<div class="cmd">mtr google.com</div><div class="output">  # Más potente (sudo apt install mtr)</div>
+<span class="t-gap"></span>
+<div class="comment">DNS</div>
+<div class="cmd">nslookup google.com</div>
+<div class="cmd">dig google.com</div>
+<div class="cmd">dig google.com ANY</div><div class="output">  # Todos los registros DNS</div>
+<div class="cmd">host -t mx google.com</div><div class="output">  # Registros MX (email)</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">curl y wget — transferencia de datos</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">curl & wget</div></div>
+<div class="terminal-body">
+<div class="comment">Petición HTTP básica</div>
+<div class="cmd">curl https://httpbin.org/get</div>
+<span class="t-gap"></span>
+<div class="comment">Ver cabeceras</div>
+<div class="cmd">curl -I https://google.com</div>
+<span class="t-gap"></span>
+<div class="comment">POST con datos JSON</div>
+<div class="cmd">curl -X POST https://api.ejemplo.com/login \</div>
+<div class="cmd">  -H "Content-Type: application/json" \</div>
+<div class="cmd">  -d '{"user":"admin","pass":"1234"}'</div>
+<span class="t-gap"></span>
+<div class="comment">Descargar archivo</div>
+<div class="cmd">wget https://ejemplo.com/archivo.zip</div>
+<div class="cmd">curl -O https://ejemplo.com/archivo.zip</div>
+<span class="t-gap"></span>
+<div class="comment">Seguir redirecciones, ignorar SSL</div>
+<div class="cmd">curl -L -k https://sitio.com</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">UFW — Firewall básico</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">UFW - Uncomplicated Firewall</div></div>
+<div class="terminal-body">
+<div class="root-cmd">ufw enable</div>
+<div class="root-cmd">ufw status verbose</div>
+<span class="t-gap"></span>
+<div class="comment">Permitir puertos</div>
+<div class="root-cmd">ufw allow ssh</div><div class="output">      # Puerto 22</div>
+<div class="root-cmd">ufw allow 80/tcp</div><div class="output">   # HTTP</div>
+<div class="root-cmd">ufw allow 443/tcp</div><div class="output">  # HTTPS</div>
+<span class="t-gap"></span>
+<div class="comment">Denegar</div>
+<div class="root-cmd">ufw deny 23/tcp</div><div class="output">  # Bloquear telnet</div>
+<div class="root-cmd">ufw deny from 192.168.1.100</div>
+<span class="t-gap"></span>
+<div class="comment">Ver reglas numeradas</div>
+<div class="root-cmd">ufw status numbered</div>
+<div class="root-cmd">ufw delete 3</div><div class="output">  # Eliminar regla 3</div>
+</div></div>
+</div>`
+          },
+          {
+            id: "6.2", title: "SSH — Conexiones seguras remotas", time: "20 min", level: "Intermedio", tag: "tag-blue",
+            content: `
+<div class="section"><div class="section-title">SSH básico</div>
+<div class="prose"><p><strong>SSH</strong> (Secure Shell) es el protocolo estándar para administrar servidores remotos de forma segura. Es fundamental para sysadmins, devops y pentesters.</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">SSH</div></div>
+<div class="terminal-body">
+<div class="comment">Conectarse a un servidor</div>
+<div class="cmd">ssh usuario@192.168.1.10</div>
+<div class="cmd">ssh usuario@servidor.com -p 2222</div><div class="output">  # Puerto personalizado</div>
+<span class="t-gap"></span>
+<div class="comment">Ejecutar comando remoto</div>
+<div class="cmd">ssh usuario@servidor.com "ls -la /var/www"</div>
+<span class="t-gap"></span>
+<div class="comment">Copiar archivos con SCP</div>
+<div class="cmd">scp archivo.txt usuario@servidor:/home/usuario/</div>
+<div class="cmd">scp -r directorio/ usuario@servidor:/tmp/</div>
+<div class="cmd">scp usuario@servidor:/etc/passwd ./passwd_backup</div>
+<span class="t-gap"></span>
+<div class="comment">rsync — sincronización avanzada</div>
+<div class="cmd">rsync -avz ~/proyectos/ usuario@servidor:/backup/</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Autenticación por claves SSH (sin contraseña)</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Claves SSH</div></div>
+<div class="terminal-body">
+<div class="comment">Generar par de claves</div>
+<div class="cmd">ssh-keygen -t ed25519 -C "juan@trabajo"</div>
+<div class="output">Generating public/private ed25519 key pair.
+Enter file: ~/.ssh/id_ed25519
+Enter passphrase: [opcional pero recomendada]</div>
+<span class="t-gap"></span>
+<div class="comment">Copiar clave pública al servidor</div>
+<div class="cmd">ssh-copy-id usuario@servidor.com</div>
+<span class="t-gap"></span>
+<div class="comment">O manualmente</div>
+<div class="cmd">cat ~/.ssh/id_ed25519.pub | ssh usuario@servidor \</div>
+<div class="cmd">  "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"</div>
+<span class="t-gap"></span>
+<div class="comment">Ver y gestionar claves</div>
+<div class="cmd">ls -la ~/.ssh/</div>
+<div class="cmd">ssh-keygen -lf ~/.ssh/id_ed25519.pub</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">~/.ssh/config — Simplificar conexiones</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">~/.ssh/config</div></div>
+<div class="terminal-body">
+<div class="output">Host trabajo
+    HostName 203.0.113.50
+    User juan
+    Port 2222
+    IdentityFile ~/.ssh/id_trabajo
+
+Host lab-kali
+    HostName 192.168.1.100
+    User kali
+    IdentityFile ~/.ssh/id_lab</div>
+<span class="t-gap"></span>
+<div class="comment">Ahora puedes conectar simplemente con:</div>
+<div class="cmd">ssh trabajo</div>
+<div class="cmd">ssh lab-kali</div>
+</div></div>
+</div>
+<div class="callout tip"><div class="callout-title">🔒 SSH Tunneling (Port Forwarding)</div>
+<div class="prose">Técnica avanzada muy usada en pentesting:<br><code>ssh -L 8080:192.168.1.10:80 usuario@servidor</code><br>Crea un túnel: tu puerto 8080 apunta al puerto 80 del servidor interno a través del SSH.</div></div>`
+          }
+        ]
+      },
+      {
+        id: 7, icon: "📜", title: "Bash Scripting",
+        lessons: [
+          {
+            id: "7.1", title: "Fundamentos de Bash Scripting", time: "25 min", level: "Intermedio", tag: "tag-blue",
+            content: `
+<div class="section"><div class="section-title">Tu primer script</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">mi_script.sh</div></div>
+<div class="terminal-body">
+<div class="output">#!/bin/bash</div>
+<div class="output"># Esto es un comentario</div>
+<div class="output">echo "¡Hola, Linux!"</div>
+<div class="output">echo "Hoy es: $(date)"</div>
+<div class="output">echo "Usuario: $USER"</div>
+<div class="output">echo "Directorio: $PWD"</div>
+<span class="t-gap"></span>
+<div class="comment">Dar permisos y ejecutar</div>
+<div class="cmd">chmod +x mi_script.sh</div>
+<div class="cmd">./mi_script.sh</div>
+<div class="output">¡Hola, Linux!<br>Hoy es: Mon Jan 15 10:30:00 UTC 2025<br>Usuario: juan<br>Directorio: /home/juan</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Variables y tipos de datos</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">variables.sh</div></div>
+<div class="terminal-body">
+<div class="output">#!/bin/bash</div>
+<div class="output">nombre="Juan"</div>
+<div class="output">edad=25</div>
+<div class="output">resultado=$(date +%Y)</div><div class="output">  # Capturar salida de comando</div>
+<span class="t-gap"></span>
+<div class="output">echo "Hola $nombre, tienes $edad años"</div>
+<div class="output">echo "Año actual: $resultado"</div>
+<span class="t-gap"></span>
+<div class="comment">Variables especiales</div>
+<div class="output">\$0 = nombre del script</div>
+<div class="output">\$1 \$2 ... = argumentos pasados al script</div>
+<div class="output">\$# = número de argumentos</div>
+<div class="output">\$? = código de salida del último comando</div>
+<div class="output">\$$ = PID del script actual</div>
+<div class="output">\$@ = todos los argumentos</div>
+<span class="t-gap"></span>
+<div class="comment">Leer input del usuario</div>
+<div class="output">read -p "¿Tu nombre? " nombre</div>
+<div class="output">echo "Hola, $nombre"</div>
+<span class="t-gap"></span>
+<div class="comment">Aritmética</div>
+<div class="output">suma=$((5 + 3))</div>
+<div class="output">resultado=$(echo "scale=2; 10/3" | bc)</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Condicionales</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">condicionales.sh</div></div>
+<div class="terminal-body">
+<div class="output">#!/bin/bash</div>
+<div class="output">edad=\$1</div>
+<span class="t-gap"></span>
+<div class="output">if [ $edad -ge 18 ]; then</div>
+<div class="output">    echo "Eres mayor de edad"</div>
+<div class="output">elif [ $edad -ge 13 ]; then</div>
+<div class="output">    echo "Eres adolescente"</div>
+<div class="output">else</div>
+<div class="output">    echo "Eres niño"</div>
+<div class="output">fi</div>
+<span class="t-gap"></span>
+<div class="comment">Comparadores numéricos</div>
+<div class="output">-eq = igual    -ne = diferente   -lt = menor que</div>
+<div class="output">-le = menor o igual    -gt = mayor    -ge = mayor o igual</div>
+<span class="t-gap"></span>
+<div class="comment">Comparadores de archivos</div>
+<div class="output">-f archivo = existe y es archivo</div>
+<div class="output">-d directorio = existe y es directorio</div>
+<div class="output">-r archivo = tiene permisos de lectura</div>
+<div class="output">-x archivo = tiene permisos de ejecución</div>
+<span class="t-gap"></span>
+<div class="comment">Comparadores de strings</div>
+<div class="output">[ "$a" = "$b" ]    [ "$a" != "$b" ]</div>
+<div class="output">[ -z "$var" ]  # vacía    [ -n "$var" ]  # no vacía</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Bucles</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">bucles.sh</div></div>
+<div class="terminal-body">
+<div class="comment">for loop</div>
+<div class="output">for i in 1 2 3 4 5; do</div>
+<div class="output">    echo "Número: $i"</div>
+<div class="output">done</div>
+<span class="t-gap"></span>
+<div class="comment">for con rango</div>
+<div class="output">for i in {1..10}; do</div>
+<div class="output">    echo "Puerto $i"</div>
+<div class="output">done</div>
+<span class="t-gap"></span>
+<div class="comment">for sobre archivos</div>
+<div class="output">for archivo in /var/log/*.log; do</div>
+<div class="output">    echo "Procesando: $archivo"</div>
+<div class="output">    wc -l "$archivo"</div>
+<div class="output">done</div>
+<span class="t-gap"></span>
+<div class="comment">while loop</div>
+<div class="output">contador=0</div>
+<div class="output">while [ $contador -lt 5 ]; do</div>
+<div class="output">    echo "Contador: $contador"</div>
+<div class="output">    ((contador++))</div>
+<div class="output">done</div>
+</div></div>
+</div>`
+          },
+          {
+            id: "7.2", title: "Script práctico: herramienta de recon", time: "30 min", level: "Avanzado", tag: "tag-orange",
+            content: `
+<div class="section"><div class="section-title">Script de reconocimiento básico</div>
+<div class="prose"><p>Vamos a crear un script real que combina todo lo aprendido: un <strong>escáner de información básico</strong> para un dominio.</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">recon.sh</div></div>
+<div class="terminal-body">
+<div class="output">#!/bin/bash</div>
+<div class="output"># Script de reconocimiento básico</div>
+<div class="output"># Uso: ./recon.sh &lt;dominio&gt;</div>
+<div class="output"></div>
+<div class="output">RED='\\033[0;31m'; GREEN='\\033[0;32m'</div>
+<div class="output">YELLOW='\\033[1;33m'; CYAN='\\033[0;36m'</div>
+<div class="output">NC='\\033[0m' # Sin color</div>
+<span class="t-gap"></span>
+<div class="output">if [ \$# -eq 0 ]; then</div>
+<div class="output">    echo -e "\${RED}[!] Uso: \$0 &lt;dominio&gt;\${NC}"</div>
+<div class="output">    exit 1</div>
+<div class="output">fi</div>
+<span class="t-gap"></span>
+<div class="output">DOMINIO=\$1</div>
+<div class="output">FECHA=$(date +%Y%m%d_%H%M%S)</div>
+<div class="output">REPORTE="recon_\${DOMINIO}_\${FECHA}.txt"</div>
+<span class="t-gap"></span>
+<div class="output">log() { echo -e "\$1" | tee -a "$REPORTE"; }</div>
+<span class="t-gap"></span>
+<div class="output">log "\${CYAN}[*] Iniciando reconocimiento de: $DOMINIO\${NC}"</div>
+<div class="output">log "\${CYAN}[*] Fecha: $(date)\${NC}"</div>
+<div class="output">log "----------------------------------------"</div>
+<span class="t-gap"></span>
+<div class="output">log "\n\${YELLOW}[+] INFORMACIÓN DNS\${NC}"</div>
+<div class="output">IP=$(dig +short $DOMINIO | tail -n1)</div>
+<div class="output">log "IP principal: $IP"</div>
+<div class="output">log "Registros DNS:"</div>
+<div class="output">dig $DOMINIO ANY +short 2>/dev/null | tee -a "$REPORTE"</div>
+<span class="t-gap"></span>
+<div class="output">log "\n\${YELLOW}[+] WHOIS\${NC}"</div>
+<div class="output">whois $DOMINIO 2>/dev/null | grep -E "Registrar:|Created:|Expires:" | tee -a "$REPORTE"</div>
+<span class="t-gap"></span>
+<div class="output">log "\n\${YELLOW}[+] PING\${NC}"</div>
+<div class="output">if ping -c 2 $DOMINIO &>/dev/null; then</div>
+<div class="output">    log "\${GREEN}[+] Host activo\${NC}"</div>
+<div class="output">else</div>
+<div class="output">    log "\${RED}[-] Host no responde al ping\${NC}"</div>
+<div class="output">fi</div>
+<span class="t-gap"></span>
+<div class="output">log "\n\${YELLOW}[+] CABECERAS HTTP\${NC}"</div>
+<div class="output">curl -sI "https://$DOMINIO" 2>/dev/null | head -20 | tee -a "$REPORTE"</div>
+<span class="t-gap"></span>
+<div class="output">log "\n\${GREEN}[✓] Reporte guardado en: $REPORTE\${NC}"</div>
+</div></div>
+</div>
+<div class="exercise"><div class="ex-title">🎯 Ejercicio</div>
+<ul class="ex-list">
+<li>Copia el script, dale permisos con <code>chmod +x recon.sh</code></li>
+<li>Ejecútalo contra un dominio público: <code>./recon.sh google.com</code></li>
+<li>Añade una sección que muestre los puertos abiertos usando <code>nc -zv</code></li>
+<li>Añade colores personalizados y más información DNS</li>
+</ul></div>`
+          }
+        ]
+      },
+      {
+        id: 8, icon: "🐍", title: "Programación en Linux",
+        lessons: [
+          {
+            id: "8.1", title: "Python en Linux: entorno y herramientas", time: "20 min", level: "Intermedio", tag: "tag-blue",
+            content: `
+<div class="section"><div class="section-title">Python en Linux — configuración</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Python Setup</div></div>
+<div class="terminal-body">
+<div class="comment">Verificar versión</div>
+<div class="cmd">python3 --version</div>
+<div class="cmd">pip3 --version</div>
+<span class="t-gap"></span>
+<div class="comment">Instalar pip si no está</div>
+<div class="root-cmd">apt install python3-pip python3-venv</div>
+<span class="t-gap"></span>
+<div class="comment">Entornos virtuales (¡SIEMPRE úsalos!)</div>
+<div class="cmd">python3 -m venv mi_proyecto</div>
+<div class="cmd">source mi_proyecto/bin/activate</div>
+<div class="output">(mi_proyecto) usuario@host:~$</div>
+<div class="cmd">pip install requests flask sqlalchemy</div>
+<div class="cmd">pip list</div>
+<div class="cmd">pip freeze > requirements.txt</div>
+<div class="cmd">deactivate</div>
+<span class="t-gap"></span>
+<div class="comment">Instalar desde requirements</div>
+<div class="cmd">pip install -r requirements.txt</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Python para scripting en Linux</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">linux_tools.py</div></div>
+<div class="terminal-body">
+<div class="output">#!/usr/bin/env python3</div>
+<div class="output">import os, subprocess, sys, socket, requests</div>
+<span class="t-gap"></span>
+<div class="comment">Ejecutar comandos del sistema</div>
+<div class="output">resultado = subprocess.run(['ls', '-la'], capture_output=True, text=True)</div>
+<div class="output">print(resultado.stdout)</div>
+<span class="t-gap"></span>
+<div class="comment">Variables de entorno</div>
+<div class="output">home = os.environ.get('HOME', '/tmp')</div>
+<div class="output">path = os.environ.get('PATH')</div>
+<span class="t-gap"></span>
+<div class="comment">Trabajar con archivos</div>
+<div class="output">with open('/etc/passwd', 'r') as f:</div>
+<div class="output">    for linea in f:</div>
+<div class="output">        if 'bash' in linea:</div>
+<div class="output">            print(linea.strip())</div>
+<span class="t-gap"></span>
+<div class="comment">Sockets — red</div>
+<div class="output">ip = socket.gethostbyname('google.com')</div>
+<div class="output">print(f"IP de google.com: {ip}")</div>
+<span class="t-gap"></span>
+<div class="comment">Requests HTTP</div>
+<div class="output">resp = requests.get('https://httpbin.org/get')</div>
+<div class="output">print(resp.status_code, resp.json())</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Python para ciberseguridad — port scanner</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">port_scanner.py</div></div>
+<div class="terminal-body">
+<div class="output">#!/usr/bin/env python3</div>
+<div class="output">import socket, sys</div>
+<div class="output">from datetime import datetime</div>
+<span class="t-gap"></span>
+<div class="output">target = sys.argv[1] if len(sys.argv) > 1 else '127.0.0.1'</div>
+<div class="output">print(f"[*] Escaneando {target} — {datetime.now()}")</div>
+<span class="t-gap"></span>
+<div class="output">puertos_comunes = [21,22,23,25,53,80,110,143,443,3306,5432,8080,8443]</div>
+<span class="t-gap"></span>
+<div class="output">for puerto in puertos_comunes:</div>
+<div class="output">    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</div>
+<div class="output">    sock.settimeout(1)</div>
+<div class="output">    resultado = sock.connect_ex((target, puerto))</div>
+<div class="output">    if resultado == 0:</div>
+<div class="output">        print(f"  [+] Puerto {puerto}: ABIERTO")</div>
+<div class="output">    sock.close()</div>
+<span class="t-gap"></span>
+<div class="output">print("[*] Escaneo completado")</div>
+</div></div>
+</div>`
+          },
+          {
+            id: "8.2", title: "C/C++ y herramientas de desarrollo", time: "20 min", level: "Avanzado", tag: "tag-orange",
+            content: `
+<div class="section"><div class="section-title">Compilar C en Linux</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">C Development</div></div>
+<div class="terminal-body">
+<div class="comment">Instalar herramientas</div>
+<div class="root-cmd">apt install build-essential gcc g++ gdb make cmake</div>
+<span class="t-gap"></span>
+<div class="comment">Compilar y ejecutar</div>
+<div class="cmd">gcc -o hola hola.c</div>
+<div class="cmd">g++ -o hola hola.cpp</div>
+<div class="cmd">./hola</div>
+<span class="t-gap"></span>
+<div class="comment">Con flags de optimización y warnings</div>
+<div class="cmd">gcc -Wall -Wextra -O2 -o programa main.c</div>
+<span class="t-gap"></span>
+<div class="comment">Depurar con gdb</div>
+<div class="cmd">gcc -g -o programa main.c</div>
+<div class="cmd">gdb ./programa</div>
+<div class="output">(gdb) run          # Ejecutar</div>
+<div class="output">(gdb) break main   # Poner breakpoint</div>
+<div class="output">(gdb) next         # Siguiente línea</div>
+<div class="output">(gdb) print var    # Ver variable</div>
+<div class="output">(gdb) quit         # Salir</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Makefile — automatizar compilación</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Makefile</div></div>
+<div class="terminal-body">
+<div class="output">CC = gcc</div>
+<div class="output">CFLAGS = -Wall -Wextra -O2</div>
+<div class="output">TARGET = mi_programa</div>
+<div class="output">SRCS = main.c utils.c</div>
+<div class="output">OBJS = $(SRCS:.c=.o)</div>
+<span class="t-gap"></span>
+<div class="output">$(TARGET): $(OBJS)</div>
+<div class="output">	$(CC) $(CFLAGS) -o \$@ $^</div>
+<span class="t-gap"></span>
+<div class="output">%.o: %.c</div>
+<div class="output">	$(CC) $(CFLAGS) -c -o \$@ $&lt;</div>
+<span class="t-gap"></span>
+<div class="output">clean:</div>
+<div class="output">	rm -f $(OBJS) $(TARGET)</div>
+<span class="t-gap"></span>
+<div class="output">.PHONY: clean</div>
+<span class="t-gap"></span>
+<div class="comment">Usar</div>
+<div class="cmd">make</div>
+<div class="cmd">make clean</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Git — control de versiones</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Git Workflow</div></div>
+<div class="terminal-body">
+<div class="root-cmd">apt install git</div>
+<div class="cmd">git config --global user.name "Tu Nombre"</div>
+<div class="cmd">git config --global user.email "tu@email.com"</div>
+<span class="t-gap"></span>
+<div class="comment">Flujo básico</div>
+<div class="cmd">git init</div>
+<div class="cmd">git add .</div>
+<div class="cmd">git commit -m "Primer commit"</div>
+<div class="cmd">git status</div>
+<div class="cmd">git log --oneline</div>
+<span class="t-gap"></span>
+<div class="comment">Ramas</div>
+<div class="cmd">git branch feature-nueva</div>
+<div class="cmd">git checkout feature-nueva</div>
+<div class="cmd">git merge feature-nueva</div>
+</div></div>
+</div>`
+          }
+        ]
+      },
+      {
+        id: 9, icon: "🔒", title: "Ciberseguridad – Fundamentos",
+        lessons: [
+          {
+            id: "9.1", title: "Conceptos clave y metodología", time: "20 min", level: "Avanzado", tag: "tag-orange",
+            content: `
+<div class="section"><div class="section-title">La Tríada CIA</div>
+<div class="prose"><p>La base de la ciberseguridad son tres principios fundamentales:</p></div>
+<table class="cmd-table">
+<tr><th>Principio</th><th>Definición</th><th>Ejemplo de ataque que lo viola</th></tr>
+<tr><td>🔐 Confidencialidad</td><td>Solo personas autorizadas acceden a la información</td><td>Robo de datos, sniffing, fugas</td></tr>
+<tr><td>✅ Integridad</td><td>La información no es alterada sin autorización</td><td>SQL injection, MitM, tampering</td></tr>
+<tr><td>🌐 Disponibilidad</td><td>Los sistemas están accesibles cuando se necesitan</td><td>DDoS, ransomware</td></tr>
+</table>
+</div>
+<div class="section"><div class="section-title">Tipos de hackers</div>
+<table class="cmd-table">
+<tr><th>Tipo</th><th>Descripción</th><th>Legalidad</th></tr>
+<tr><td style="color:var(--green)">⬜ White Hat</td><td>Hackers éticos — trabajan con autorización para mejorar la seguridad</td><td style="color:var(--green)">Legal</td></tr>
+<tr><td style="color:var(--text3)">⬛ Black Hat</td><td>Criminales — explotan sistemas sin autorización</td><td style="color:var(--red)">Ilegal</td></tr>
+<tr><td style="color:var(--text2)">🔲 Grey Hat</td><td>Explotan sistemas sin permiso pero sin intención maliciosa</td><td style="color:var(--yellow)">Gris</td></tr>
+</table>
+</div>
+<div class="section"><div class="section-title">Las 5 fases del Pentesting</div>
+<div class="prose">
+<ol>
+<li><strong>Reconocimiento:</strong> Recopilar información sobre el objetivo (pasivo y activo)</li>
+<li><strong>Escaneo:</strong> Descubrir puertos, servicios, versiones y vulnerabilidades</li>
+<li><strong>Explotación:</strong> Aprovechar vulnerabilidades para obtener acceso</li>
+<li><strong>Post-explotación:</strong> Mantener acceso, escalar privilegios, pivotar</li>
+<li><strong>Reporte:</strong> Documentar hallazgos y recomendaciones</li>
+</ol>
+</div>
+</div>
+<div class="section"><div class="section-title">Reconocimiento pasivo</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">OSINT — Open Source Intelligence</div></div>
+<div class="terminal-body">
+<div class="comment">Información del dominio</div>
+<div class="cmd">whois google.com</div>
+<div class="cmd">dig google.com ANY</div>
+<div class="cmd">host -t mx google.com</div>
+<span class="t-gap"></span>
+<div class="comment">theHarvester — emails, subdominios</div>
+<div class="cmd">theHarvester -d empresa.com -b google</div>
+<span class="t-gap"></span>
+<div class="comment">Shodan — dispositivos expuestos</div>
+<div class="cmd">shodan search "apache country:CO"</div>
+<span class="t-gap"></span>
+<div class="comment">Google Dorks</div>
+<div class="output">site:empresa.com filetype:pdf</div>
+<div class="output">site:empresa.com intitle:"index of"</div>
+<div class="output">site:empresa.com "contraseña" OR "password"</div>
+<div class="output">inurl:admin site:empresa.com</div>
+</div></div>
+</div>
+<div class="callout danger"><div class="callout-title">⚖️ LEGAL — Importante</div>
+<div class="prose">El hacking sin autorización escrita es un <strong>delito grave</strong> en Colombia (Ley 1273) y en todo el mundo. Practica SIEMPRE en laboratorios controlados: TryHackMe, HackTheBox, VMs propias, o con autorización explícita del propietario.</div></div>`
+          },
+          {
+            id: "9.2", title: "Nmap — escaneo de redes", time: "25 min", level: "Avanzado", tag: "tag-orange",
+            content: `
+<div class="section"><div class="section-title">Nmap — el escáner de red más poderoso</div>
+<div class="prose"><p><strong>Nmap</strong> es la herramienta más usada en ciberseguridad para descubrir hosts, puertos abiertos, servicios y vulnerabilidades en una red.</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Nmap</div></div>
+<div class="terminal-body">
+<div class="comment">Instalación</div>
+<div class="root-cmd">apt install nmap</div>
+<span class="t-gap"></span>
+<div class="comment">Escaneo básico (1000 puertos más comunes)</div>
+<div class="cmd">nmap 192.168.1.1</div>
+<span class="t-gap"></span>
+<div class="comment">Escaneo rápido</div>
+<div class="cmd">nmap -F objetivo.com</div>
+<span class="t-gap"></span>
+<div class="comment">Todos los puertos (0-65535)</div>
+<div class="cmd">nmap -p- objetivo.com</div>
+<span class="t-gap"></span>
+<div class="comment">Detectar versiones de servicios</div>
+<div class="cmd">nmap -sV objetivo.com</div>
+<div class="output">PORT   STATE SERVICE VERSION<br>22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu<br>80/tcp open  http    Apache httpd 2.4.54<br>443/tcp open  ssl/https nginx 1.22.1</div>
+<span class="t-gap"></span>
+<div class="comment">Detectar sistema operativo</div>
+<div class="cmd">sudo nmap -O objetivo.com</div>
+<span class="t-gap"></span>
+<div class="comment">Script de detección de vulnerabilidades</div>
+<div class="cmd">nmap --script vuln objetivo.com</div>
+<span class="t-gap"></span>
+<div class="comment">Escaneo agresivo (todo en uno)</div>
+<div class="cmd">sudo nmap -A -T4 objetivo.com</div>
+<span class="t-gap"></span>
+<div class="comment">Escanear rango de IPs</div>
+<div class="cmd">nmap 192.168.1.0/24</div>
+<span class="t-gap"></span>
+<div class="comment">Guardar resultado</div>
+<div class="cmd">nmap -oN resultado.txt -sV objetivo.com</div>
+<div class="cmd">nmap -oX resultado.xml -sV objetivo.com</div>
+<span class="t-gap"></span>
+<div class="comment">Scripts NSE específicos</div>
+<div class="cmd">nmap --script http-title,http-headers objetivo.com</div>
+<div class="cmd">nmap --script ssh-auth-methods -p 22 objetivo.com</div>
+<div class="cmd">nmap --script ftp-anon -p 21 objetivo.com</div>
+</div></div>
+</div>
+<div class="callout info"><div class="callout-title">💡 Practica en laboratorio</div>
+<div class="prose">Usa <code>nmap scanme.nmap.org</code> — servidor oficial de Nmap para pruebas. O levanta una VM con una máquina vulnerable como <strong>Metasploitable 2</strong>.</div></div>`
+          }
+        ]
+      },
+      {
+        id: 10, icon: "🛡️", title: "Kali Linux & Hacking Ético",
+        lessons: [
+          {
+            id: "10.1", title: "Kali Linux: instalación y herramientas", time: "20 min", level: "Avanzado", tag: "tag-red",
+            content: `
+<div class="section"><div class="section-title">¿Qué es Kali Linux?</div>
+<div class="prose"><p><strong>Kali Linux</strong> es una distribución basada en Debian, desarrollada por Offensive Security, diseñada específicamente para pruebas de penetración, análisis forense y ciberseguridad. Incluye más de 600 herramientas preinstaladas.</p></div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Kali Setup</div></div>
+<div class="terminal-body">
+<div class="comment">Actualizar Kali después de instalar</div>
+<div class="root-cmd">apt update && apt upgrade -y</div>
+<div class="root-cmd">apt dist-upgrade -y</div>
+<span class="t-gap"></span>
+<div class="comment">Instalar herramientas adicionales</div>
+<div class="root-cmd">apt install kali-linux-large</div>
+<span class="t-gap"></span>
+<div class="comment">Ver herramientas instaladas por categoría</div>
+<div class="cmd">ls /usr/share/</div>
+<div class="cmd">kali-menu</div>
+</div></div>
+</div>
+<div class="section"><div class="section-title">Herramientas esenciales de Kali</div>
+<table class="cmd-table">
+<tr><th>Herramienta</th><th>Categoría</th><th>Uso</th></tr>
+<tr><td>nmap</td><td>Reconocimiento</td><td>Escaneo de puertos y servicios</td></tr>
+<tr><td>Metasploit</td><td>Explotación</td><td>Framework de exploits</td></tr>
+<tr><td>Burp Suite</td><td>Web</td><td>Proxy para análisis de apps web</td></tr>
+<tr><td>Wireshark</td><td>Red</td><td>Análisis de tráfico de red</td></tr>
+<tr><td>John the Ripper</td><td>Passwords</td><td>Cracking de hashes</td></tr>
+<tr><td>Hydra</td><td>Fuerza bruta</td><td>Ataque a servicios de autenticación</td></tr>
+<tr><td>SQLmap</td><td>Web</td><td>Inyección SQL automatizada</td></tr>
+<tr><td>Aircrack-ng</td><td>WiFi</td><td>Auditoría de redes inalámbricas</td></tr>
+<tr><td>Gobuster</td><td>Web</td><td>Fuerza bruta de directorios web</td></tr>
+<tr><td>Nikto</td><td>Web</td><td>Escáner de vulnerabilidades web</td></tr>
+</table>
+</div>
+<div class="section"><div class="section-title">Metasploit Framework — básicos</div>
+<div class="terminal"><div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><div class="term-title">Metasploit (solo en laboratorio)</div></div>
+<div class="terminal-body">
+<div class="comment">Iniciar Metasploit</div>
+<div class="cmd">msfconsole</div>
+<span class="t-gap"></span>
+<div class="comment">Comandos básicos dentro de msfconsole</div>
+<div class="output">msf6 > search eternalblue</div>
+<div class="output">msf6 > use exploit/windows/smb/ms17_010_eternalblue</div>
+<div class="output">msf6 exploit > show options</div>
+<div class="output">msf6 exploit > set RHOSTS 192.168.1.50</div>
+<div class="output">msf6 exploit > set LHOST 192.168.1.10</div>
+<div class="output">msf6 exploit > run</div>
+<span class="t-gap"></span>
+<div class="comment">Después de explotar — comandos Meterpreter</div>
+<div class="output">meterpreter > sysinfo</div>
+<div class="output">meterpreter > getuid</div>
+<div class="output">meterpreter > hashdump</div>
+<div class="output">meterpreter > shell</div>
+</div></div>
+</div>
+<div class="callout danger"><div class="callout-title">☠️ SOLO EN LABORATORIO</div>
+<div class="prose">Metasploit y estas herramientas se deben usar ÚNICAMENTE en tu propio laboratorio o con autorización escrita. Usa Metasploitable 2, VulnHub, TryHackMe o HackTheBox para practicar legalmente.</div></div>`
+          },
+          {
+            id: "10.2", title: "Recursos, CTFs y camino profesional", time: "15 min", level: "Avanzado", tag: "tag-red",
+            content: `
+<div class="section"><div class="section-title">Plataformas de práctica</div>
+<div class="resource-grid">
+<div class="resource-card"><h4>TryHackMe</h4><p>Perfecto para principiantes. Laboratorios guiados paso a paso, desde básico hasta avanzado.</p></div>
+<div class="resource-card"><h4>HackTheBox</h4><p>Más desafiante. Máquinas reales para hackear. Muy valorado por empleadores.</p></div>
+<div class="resource-card"><h4>VulnHub</h4><p>Máquinas virtuales para descargar y practicar offline en tu laboratorio.</p></div>
+<div class="resource-card"><h4>OverTheWire</h4><p>Wargames de Linux: Bandit para principiantes, Narnia, Leviathan.</p></div>
+<div class="resource-card"><h4>PicoCTF</h4><p>CTF de la Carnegie Mellon University. Excelente para aprender desde cero.</p></div>
+<div class="resource-card"><h4>CTFtime.org</h4><p>Calendario de competencias CTF activas en todo el mundo.</p></div>
+</div>
+</div>
+<div class="section"><div class="section-title">Certificaciones recomendadas</div>
+<table class="cmd-table">
+<tr><th>Certificación</th><th>Nivel</th><th>Ideal para</th></tr>
+<tr><td>CompTIA Linux+</td><td>Básico</td><td>Sysadmin, primer empleo en Linux</td></tr>
+<tr><td>eJPT (eLearnSecurity)</td><td>Básico</td><td>Primera certificación de pentesting</td></tr>
+<tr><td>CEH</td><td>Intermedio</td><td>Hacking ético corporativo</td></tr>
+<tr><td>OSCP (OffSec)</td><td>Avanzado</td><td>Pentester profesional — la más valorada</td></tr>
+<tr><td>CompTIA Security+</td><td>Intermedio</td><td>Seguridad general, muchas empresas la exigen</td></tr>
+</table>
+</div>
+<div class="section"><div class="section-title">Ruta de aprendizaje recomendada</div>
+<div class="prose">
+<ol>
+<li><strong>Meses 1-2:</strong> Linux sólido + redes básicas (TCP/IP, DNS, HTTP)</li>
+<li><strong>Mes 3:</strong> Bash scripting + Python para automatización</li>
+<li><strong>Meses 4-5:</strong> TryHackMe paths (Linux, Web, Network)</li>
+<li><strong>Mes 6:</strong> Primera certificación (eJPT o CompTIA Security+)</li>
+<li><strong>Meses 7-12:</strong> HackTheBox + preparación para OSCP</li>
+<li><strong>Año 2+:</strong> Especialización: Web App, Active Directory, Mobile, Cloud</li>
+</ol>
+</div>
+</div>
+<div class="section"><div class="section-title">Recursos gratuitos imprescindibles</div>
+<div class="resource-grid">
+<div class="resource-card"><h4>Linux Journey</h4><p>linuxjourney.com — curso interactivo de Linux en inglés, muy completo</p></div>
+<div class="resource-card"><h4>The Linux Command Line</h4><p>Libro gratuito de William Shotts (linuxcommand.org)</p></div>
+<div class="resource-card"><h4>OWASP Top 10</h4><p>Las 10 vulnerabilidades web más críticas — lectura obligatoria</p></div>
+<div class="resource-card"><h4>GTFOBins</h4><p>gtfobins.github.io — binarios Linux para bypass y escalada de privilegios</p></div>
+</div>
+</div>
+<div class="callout tip"><div class="callout-title">🎯 Consejo final</div>
+<div class="prose">La ciberseguridad se aprende <strong>haciendo</strong>. Por cada hora que lees, dedica 3 horas a practicar en laboratorios reales. Documenta todo lo que aprendes en un blog o repositorio de GitHub — esto te abrirá puertas laborales.</div></div>`
+          }
+        ]
+      }
+    ];
+
+    // ─── STATE ───────────────────────────────────────────────────────────────────
+    let currentLesson = null;
+    let done = new Set();
+    let flatLessons = [];
+    MODULES.forEach(m => m.lessons.forEach(l => flatLessons.push({ mod: m, lesson: l })));
+
+    // ─── RENDER SIDEBAR ──────────────────────────────────────────────────────────
+    function renderSidebar() {
+      const list = document.getElementById('mod-list');
+      list.innerHTML = '';
+      MODULES.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'mod-item';
+        item.id = 'mod-' + m.id;
+        const doneLessons = m.lessons.filter(l => done.has(l.id)).length;
+        item.innerHTML = `
+      <div class="mod-header" onclick="toggleMod(${m.id})">
+        <span class="mod-icon">${m.icon}</span>
+        <span class="mod-title">${m.title}</span>
+        ${doneLessons > 0 ? `<span class="mod-badge">${doneLessons}/${m.lessons.length}</span>` : ''}
+        <span class="mod-arrow">▶</span>
+      </div>
+      <div class="lesson-list">${m.lessons.map(l => `
+        <button class="lesson-btn ${done.has(l.id) ? 'done' : ''} ${currentLesson && currentLesson.id === l.id ? 'active' : ''}" onclick="loadLesson('${l.id}')">
+          <span class="lesson-dot"></span>${l.title}
+        </button>`).join('')}
+      </div>`;
+        list.appendChild(item);
+        if (currentLesson && m.lessons.find(l => l.id === currentLesson.id)) {
+          item.classList.add('open');
+          item.querySelector('.mod-header').classList.add('active');
+        }
+      });
+      updateProgress();
+    }
+
+    function toggleMod(id) {
+      const item = document.getElementById('mod-' + id);
+      item.classList.toggle('open');
+    }
+
+    function updateProgress() {
+      const total = flatLessons.length;
+      const n = done.size;
+      const pct = total ? Math.round(n / total * 100) : 0;
+      document.getElementById('prog-bar').style.width = pct + '%';
+      document.getElementById('prog-label').textContent = `${n} / ${total} lecciones completadas`;
+    }
+
+    // ─── LOAD LESSON ─────────────────────────────────────────────────────────────
+    function loadLesson(id) {
+      const found = flatLessons.find(x => x.lesson.id === id);
+      if (!found) return;
+      currentLesson = found.lesson;
+      const mod = found.mod;
+
+      document.getElementById('top-bar').style.display = 'flex';
+      document.getElementById('breadcrumb').innerHTML =
+        `<span>${mod.icon} ${mod.title}</span> <span style="color:var(--border2)">/</span> <span>${currentLesson.title}</span>`;
+
+      const doneBtn = document.getElementById('btn-done');
+      doneBtn.textContent = done.has(id) ? '✓ Completado' : 'Marcar como visto ✓';
+      doneBtn.style.background = done.has(id) ? 'var(--green3)' : '';
+      doneBtn.style.borderColor = done.has(id) ? 'var(--green2)' : '';
+      doneBtn.style.color = done.has(id) ? 'var(--green)' : '';
+
+      const tagMap = { 'tag-green': ['Básico', 'tag-green'], 'tag-blue': ['Intermedio', 'tag-blue'], 'tag-orange': ['Avanzado', 'tag-orange'], 'tag-red': ['Experto', 'tag-red'] };
+      const [levelLabel] = tagMap[currentLesson.tag] || ['Básico', 'tag-green'];
+
+      document.getElementById('content-area').innerHTML = `
+    <div class="content">
+      <h1 class="lesson-title">${currentLesson.title}</h1>
+      <div class="lesson-meta">
+        <span class="tag ${currentLesson.tag}">${levelLabel}</span>
+        <span class="tag tag-blue">⏱ ${currentLesson.time}</span>
+        <span class="tag tag-purple">📖 ${mod.title}</span>
+      </div>
+      ${currentLesson.content}
+    </div>`;
+
+      document.querySelector('.main').scrollTo(0, 0);
+      renderSidebar();
+    }
+
+    async function markDone() {
+      if (!currentLesson) return;
+      const id = currentLesson.id;
+      const isDone = done.has(id);
+      if (isDone) done.delete(id);
+      else done.add(id);
+      const doneBtn = document.getElementById('btn-done');
+      doneBtn.textContent = done.has(id) ? '✓ Completado' : 'Marcar como visto ✓';
+      doneBtn.style.background = done.has(id) ? 'var(--green3)' : '';
+      doneBtn.style.borderColor = done.has(id) ? 'var(--green2)' : '';
+      doneBtn.style.color = done.has(id) ? 'var(--green)' : '';
+      renderSidebar();
+
+      if (authToken) {
+        try {
+          await fetch(`${API_URL}/progress`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+            body: JSON.stringify({ lessonId: id, done: !isDone })
+          });
+          await fetchProfile();
+        } catch (err) { console.error('Error saving progress', err); }
+      }
+    }
+
+    function navLesson(dir) {
+      if (!currentLesson) return;
+      const idx = flatLessons.findIndex(x => x.lesson.id === currentLesson.id);
+      const next = flatLessons[idx + dir];
+      if (next) loadLesson(next.lesson.id);
+    }
+
+    // ─── WELCOME SCREEN ───────────────────────────────────────────────────────────
+    function showWelcome() {
+      document.getElementById('top-bar').style.display = 'none';
+      document.getElementById('content-area').innerHTML = `
+    <div class="welcome">
+      <h1>Bienvenido al<br><span>Curso Linux Completo</span></h1>
+      <p>Un curso en español desde cero hasta ciberseguridad avanzada. Aprende los fundamentos, bash scripting, programación en Python/C y hacking ético con Kali Linux.</p>
+      <p style="color:var(--text3);font-size:13px;">📍 ${flatLessons.length} lecciones · 10 módulos · Del escritorio al pentesting</p>
+      <div class="mod-grid">
+        ${MODULES.map(m => `
+          <div class="mod-card" onclick="loadLesson('${m.lessons[0].id}')">
+            <div class="icon">${m.icon}</div>
+            <h3>${m.title}</h3>
+            <p>${m.lessons.length} lección${m.lessons.length !== 1 ? 'es' : ''}</p>
+          </div>`).join('')}
+      </div>
+    </div>`;
+    }
+
+    // ─── AUTH LOGIC ──────────────────────────────────────────────────────────────
+    function openModal(mode) {
+      authMode = mode;
+      document.getElementById('auth-modal').style.display = 'flex';
+      const isLogin = mode === 'login';
+      document.getElementById('modal-title').textContent = isLogin ? 'Iniciar Sesión' : 'Registrarse';
+      document.getElementById('modal-submit').textContent = isLogin ? 'Entrar' : 'Crear cuenta';
+      document.getElementById('modal-toggle').textContent = isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión';
+      document.getElementById('group-username').style.display = isLogin ? 'none' : 'block';
+      document.getElementById('auth-username').required = !isLogin;
+    }
+
+    function toggleAuthMode() {
+      openModal(authMode === 'login' ? 'register' : 'login');
+    }
+
+    window.onclick = function (event) {
+      const modal = document.getElementById('auth-modal');
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    async function handleAuth(e) {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value;
+      const password = document.getElementById('auth-password').value;
+      const username = document.getElementById('auth-username').value;
+
+      const endpoint = authMode === 'login' ? '/auth/login' : '/auth/register';
+      const body = authMode === 'login' ? { email, password } : { username, email, password };
+
+      try {
+        const res = await fetch(`${API_URL}${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          authToken = data.token;
+          localStorage.setItem('linux_token', authToken);
+          document.getElementById('auth-modal').style.display = 'none';
+          await fetchProfile();
+          await fetchProgress();
+        } else {
+          alert(data.message || 'Error en autenticación');
+        }
+      } catch (err) {
+        alert('No se pudo conectar al servidor.');
+        console.error(err);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('linux_token');
+      authToken = null;
+      currentUser = null;
+      done.clear();
+      document.getElementById('login-prompt').style.display = 'block';
+      document.getElementById('user-profile').style.display = 'none';
+      renderSidebar();
+    }
+
+    async function fetchProfile() {
+      if (!authToken) return;
+      try {
+        const res = await fetch(`${API_URL}/auth/profile`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (res.ok) {
+          currentUser = await res.json();
+          document.getElementById('login-prompt').style.display = 'none';
+          document.getElementById('user-profile').style.display = 'block';
+          document.getElementById('profile-name').textContent = currentUser.username;
+          document.getElementById('profile-level').textContent = `Lvl ${currentUser.level}`;
+
+          const xpInLevel = currentUser.xp % 50;
+          const xpPct = (xpInLevel / 50) * 100;
+          document.getElementById('xp-bar').style.width = `${xpPct}%`;
+          document.getElementById('xp-label').textContent = `${xpInLevel} / 50 XP (Nivel ${currentUser.level})`;
+        } else {
+          logout();
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    async function fetchProgress() {
+      if (!authToken) return;
+      try {
+        const res = await fetch(`${API_URL}/progress`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          done.clear();
+          data.completedLessons.forEach(id => done.add(id));
+          renderSidebar();
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    // ─── INIT ────────────────────────────────────────────────────────────────────
+    async function initApp() {
+      if (authToken) {
+        await fetchProfile();
+        await fetchProgress();
+      } else {
+        document.getElementById('login-prompt').style.display = 'block';
+        document.getElementById('user-profile').style.display = 'none';
+      }
+      renderSidebar();
+      showWelcome();
+    }
+
+    initApp();
+  </script>
+</body>
+
+</html>
