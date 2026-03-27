@@ -1,85 +1,148 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Linux Lab — Plataforma Interactiva de Ciberseguridad</title>
-<meta name="description" content="Plataforma interactiva para aprender Linux y ciberseguridad con terminal simulada, retos CTF, logros y gamificación.">
-<link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux Lab — Plataforma Interactiva de Ciberseguridad</title>
+  <meta name="description" content="Plataforma interactiva para aprender Linux y ciberseguridad.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
 </head>
+
 <body>
 
-<!-- Matrix Rain Background -->
-<canvas class="matrix-canvas" id="matrix-canvas"></canvas>
+  <canvas class="matrix-canvas" id="matrix-canvas"></canvas>
 
-<div class="app">
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <h1>🐧 Linux Lab</h1>
-      <p>Programación &amp; Ciberseguridad</p>
-      <div class="progress-bar-wrap"><div class="progress-bar" id="prog-bar" style="width:0%"></div></div>
-      <div class="progress-label" id="prog-label">0 / 0 lecciones completadas</div>
-    </div>
-
-    <!-- XP Section -->
-    <div class="xp-section">
-      <div class="xp-header">
-        <div class="xp-level">
-          <span class="level-icon" id="xp-level-icon">🌱</span>
-          <span id="xp-level-text">Novato</span>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🐧 Linux Lab</h1>
+        <p>Programación &amp; Ciberseguridad</p>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="prog-bar" style="width:0%"></div>
         </div>
-        <span class="xp-amount" id="xp-amount">0 XP</span>
+        <div class="progress-label" id="prog-label">0 / 0 lecciones completadas</div>
       </div>
-      <div class="xp-bar-wrap">
-        <div class="xp-bar" id="xp-bar" style="width:0%"></div>
+
+      <!-- Auth Section -->
+      <div
+        style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.75rem; border-bottom:1px solid #313244;">
+        <div id="user-info"></div>
+        <button id="btn-login" onclick="AuthModal.open('login')">🔑 Iniciar sesión</button>
+        <button id="btn-logout" onclick="API.logout()">Salir 🚪</button>
       </div>
-      <div class="xp-next-level" id="xp-next-level">100 XP para Aprendiz</div>
-    </div>
 
-    <!-- Streak Section -->
-    <div class="streak-section">
-      <span class="streak-flame">🔥</span>
-      <span class="streak-count" id="streak-count">0</span>
-      <span class="streak-label">Racha</span>
-      <span class="streak-days-text" id="streak-days-text">días seguidos</span>
-    </div>
-
-    <!-- Lab Button -->
-    <div class="lab-btn-wrap">
-      <button class="lab-btn" id="lab-btn">
-        <div class="pulse"></div>
-        🧪 Laboratorio CTF
-      </button>
-    </div>
-
-    <!-- Dashboard Button -->
-    <div class="dash-btn-wrap">
-      <button class="dash-btn" id="dash-btn">📊 Mi Perfil / Dashboard</button>
-    </div>
-
-    <div class="mod-list" id="mod-list"></div>
-  </aside>
-
-  <main class="main">
-    <div class="top-bar" id="top-bar" style="display:none">
-      <div class="breadcrumb" id="breadcrumb"></div>
-      <div class="lesson-nav">
-        <button class="nav-btn" id="btn-prev" onclick="navLesson(-1)">← Anterior</button>
-        <button class="nav-btn" id="btn-done" onclick="markDone()">Marcar como visto ✓</button>
-        <button class="nav-btn primary" id="btn-next" onclick="navLesson(1)">Siguiente →</button>
+      <!-- XP Section -->
+      <div class="xp-section">
+        <div class="xp-header">
+          <div class="xp-level">
+            <span class="level-icon" id="xp-level-icon">🌱</span>
+            <span id="xp-level-text">Novato</span>
+          </div>
+          <span class="xp-amount" id="xp-amount">0 XP</span>
+        </div>
+        <div class="xp-bar-wrap">
+          <div class="xp-bar" id="xp-bar" style="width:0%"></div>
+        </div>
+        <div class="xp-next-level" id="xp-next-level">100 XP para Aprendiz</div>
       </div>
-    </div>
-    <div id="content-area"></div>
-  </main>
-</div>
 
-<!-- Scripts (dependency order) -->
-<script src="js/filesystem.js"></script>
-<script src="js/terminal.js"></script>
-<script src="js/gamification.js"></script>
-<script src="js/achievements.js"></script>
-<script src="js/challenges.js"></script>
-<script src="js/app.js"></script>
+      <!-- Streak Section -->
+      <div class="streak-section">
+        <span class="streak-flame">🔥</span>
+        <span class="streak-count" id="streak-count">0</span>
+        <span class="streak-label">Racha</span>
+        <span class="streak-days-text" id="streak-days-text">días seguidos</span>
+      </div>
+
+      <!-- Lab Button -->
+      <div class="lab-btn-wrap">
+        <button class="lab-btn" id="lab-btn">
+          <div class="pulse"></div>
+          🧪 Laboratorio CTF
+        </button>
+      </div>
+
+      <!-- Dashboard Button -->
+      <div class="dash-btn-wrap">
+        <button class="dash-btn" id="dash-btn">📊 Mi Perfil / Dashboard</button>
+      </div>
+
+      <div class="mod-list" id="mod-list"></div>
+    </aside>
+
+    <main class="main">
+      <div class="top-bar" id="top-bar" style="display:none">
+        <div class="breadcrumb" id="breadcrumb"></div>
+        <div class="lesson-nav">
+          <button class="nav-btn" id="btn-prev" onclick="navLesson(-1)">← Anterior</button>
+          <button class="nav-btn" id="btn-done" onclick="markDone()">Marcar como visto ✓</button>
+          <button class="nav-btn primary" id="btn-next" onclick="navLesson(1)">Siguiente →</button>
+        </div>
+      </div>
+      <div id="content-area"></div>
+    </main>
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div id="auth-overlay"></div>
+  <div id="auth-modal" style="position:relative">
+    <button id="auth-close">✕</button>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login">Iniciar sesión</button>
+      <button class="auth-tab" id="tab-register">Registrarse</button>
+    </div>
+    <form class="auth-form" id="form-login" style="display:flex">
+      <div class="auth-field">
+        <label>Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="tu@email.com" required>
+      </div>
+      <div class="auth-field">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" required>
+      </div>
+      <div class="auth-error" id="login-error"></div>
+      <button type="submit" class="auth-btn" id="btn-login-submit">Iniciar sesión</button>
+    </form>
+    <form class="auth-form" id="form-register" style="display:none">
+      <div class="auth-field">
+        <label>Nombre de usuario</label>
+        <input type="text" id="reg-username" placeholder="hackerman" required>
+      </div>
+      <div class="auth-field">
+        <label>Correo electrónico</label>
+        <input type="email" id="reg-email" placeholder="tu@email.com" required>
+      </div>
+      <div class="auth-field">
+        <label>Contraseña</label>
+        <input type="password" id="reg-password" placeholder="••••••••" required>
+      </div>
+      <div class="auth-field">
+        <label>Repetir contraseña</label>
+        <input type="password" id="reg-password2" placeholder="••••••••" required>
+      </div>
+      <div class="auth-error" id="reg-error"></div>
+      <button type="submit" class="auth-btn" id="btn-register-submit">Crear cuenta</button>
+    </form>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/filesystem.js"></script>
+  <script src="js/terminal.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/achievements.js"></script>
+  <script src="js/challenges.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/auth-modal.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      AuthModal.init();
+      API.updateAuthUI();
+    });
+  </script>
 
 </body>
+
 </html>
