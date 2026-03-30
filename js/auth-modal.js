@@ -19,7 +19,7 @@
       const btn = document.getElementById("btn-login-submit");
       btn.textContent = "Entrando..."; btn.disabled = true;
       const result = await API.login(email, password);
-      if (result.success) {
+      if (result.ok) {
         close(); API.updateAuthUI();
         showToast("Bienvenido de nuevo, " + result.data.username + "!");
         const progress = await API.loadProgress();
@@ -41,7 +41,7 @@
       const btn = document.getElementById("btn-register-submit");
       btn.textContent = "Registrando..."; btn.disabled = true;
       const result = await API.register(username, email, password);
-      if (result.success) { close(); API.updateAuthUI(); showToast("Cuenta creada! Bienvenido, " + result.data.username + "!"); }
+      if (result.ok) { close(); API.updateAuthUI(); showToast("Cuenta creada! Bienvenido, " + result.data.username + "!"); }
       else { showError("reg-error", result.error); }
       btn.textContent = "Crear cuenta"; btn.disabled = false;
     });
@@ -61,14 +61,14 @@
   }
 
   function showError(id, msg) { var el = document.getElementById(id); if (el) { el.textContent = msg; el.style.display = "block"; } }
-  function clearErrors() { ["login-error","reg-error"].forEach(function(id) { var el = document.getElementById(id); if (el) { el.textContent = ""; el.style.display = "none"; } }); }
+  function clearErrors() { ["login-error", "reg-error"].forEach(function (id) { var el = document.getElementById(id); if (el) { el.textContent = ""; el.style.display = "none"; } }); }
 
   function showToast(msg) {
     var t = document.createElement("div");
     t.className = "auth-toast"; t.textContent = msg;
     document.body.appendChild(t);
-    requestAnimationFrame(function() { t.classList.add("show"); });
-    setTimeout(function() { t.classList.remove("show"); setTimeout(function() { t.remove(); }, 400); }, 3000);
+    requestAnimationFrame(function () { t.classList.add("show"); });
+    setTimeout(function () { t.classList.remove("show"); setTimeout(function () { t.remove(); }, 400); }, 3000);
   }
 
   return { init: init, open: open, close: close };
